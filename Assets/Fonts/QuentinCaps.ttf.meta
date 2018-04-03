@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: efe6784dd294c8c459aa779522eac05d
+timeCreated: 1522574330
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: QuentinCaps
+  fontNames:
+  - QuentinCaps
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
