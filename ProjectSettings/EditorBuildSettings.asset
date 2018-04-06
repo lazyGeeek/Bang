@@ -8,3 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: 6be7c4de6191f034d9b4e4a46826605b
+  - enabled: 1
+    path: Assets/Scenes/PlayTable.unity
+    guid: 38d83bc5cfbb1ca44a7647adafad9f7d
