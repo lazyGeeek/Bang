@@ -8,7 +8,7 @@ public class Bot : MonoBehaviour
     public Image[] healthImage;
     public Image characterImage;
     public Image roleImage;
-    public List<Image> hand = new List<Image>();
+    public List<Sprite> hand = new List<Sprite>();
 
     Sprite role;
     int maxHealth = 4;

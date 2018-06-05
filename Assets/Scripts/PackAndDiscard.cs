@@ -1,18 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PackAndDiscard
 {
-    static List<Image> pack = new List<Image>(Resources.LoadAll<Image>("Images/Pack"));
-    static List<Image> discard = new List<Image>();
+    static List<Sprite> pack = new List<Sprite>(Resources.LoadAll<Sprite>("Images/Pack"));
+    static List<Sprite> discard = new List<Sprite>();
 
-    public static Image GetCard()
+    public static Sprite GetCard()
     {
         if (pack.Count == 0)
             RemixPack();
-        Image sprite = pack[Random.Range(0, pack.Count)];
+        Sprite sprite = pack[Random.Range(0, pack.Count)];
         pack.Remove(sprite);
         discard.Add(sprite);
         return sprite;

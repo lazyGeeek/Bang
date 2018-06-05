@@ -6,15 +6,31 @@ using UnityEngine.UI;
 public class PlayerCards : MonoBehaviour
 {
     [SerializeField] private GameObject cardSpawn;
+    [SerializeField] private Button buttonTemplate;
 
-	private void Awake ()
+    //Create player card in new Zone
+    private void Awake ()
     {
-        foreach(Image sp in Player.hand)
+        foreach(Sprite sp in Player.hand)
         {
-            Instantiate<Image>(sp, cardSpawn.transform);
+            Button button = Instantiate<Button>(buttonTemplate, cardSpawn.transform);
+            button.image.sprite = sp;
+            button.tag = GetTag(sp);
+            button.name = sp.name;
         }
 	}
 
+    string GetTag(Sprite sp)
+    {
+        if (sp.name.Contains("volcano") || sp.name.Contains("remington") ||
+            sp.name.Contains("colt") || sp.name.Contains("carabine")) return "Gun";
+        else if (sp.name.Contains("appaloosa") || sp.name.Contains("barrel") ||
+            sp.name.Contains("dynamite") || sp.name.Contains("jail") ||
+            sp.name.Contains("mustang") || sp.name.Contains("rage")) return "Buff";
+        return "Act";
+    }
+
+    //Close(delete) zone
     public void Close()
     {
         Destroy(this.gameObject);

@@ -4,11 +4,13 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Buff
+  - PlayerCharacter
   - Act
+  - Buff
   - Gun
-  - Dynamite
-  - Duel
+  - PlayerRole
+  - PlayerWeapon
+  - PlayerBuffs
   layers:
   - Default
   - TransparentFX

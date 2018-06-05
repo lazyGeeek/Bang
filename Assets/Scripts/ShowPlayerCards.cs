@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class ShowPlayerCards : MonoBehaviour
 {
-    [SerializeField] private GameObject playerCards;
-    [SerializeField] private GameObject parent;
+    [SerializeField] private GameObject playerCardsZone;
+    [SerializeField] private GameObject parentObject;
     
+    //Show all player card in hand
     public void ShowZone()
     {
-        Instantiate(playerCards.gameObject, parent.transform);
+        Instantiate(playerCardsZone.gameObject, parentObject.transform);
     }
 }
