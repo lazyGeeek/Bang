@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Bot : MonoBehaviour
+public class BotAction : MonoBehaviour
 {
     public Image[] healthImage;
     public Image characterImage;
@@ -13,6 +13,7 @@ public class Bot : MonoBehaviour
     Sprite role;
     int maxHealth = 4;
 
+    //Random select bots role, characterisric and health
     private void Awake()
     {
         characterImage.sprite = ComponentPreload.GetCharacter();

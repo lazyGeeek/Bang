@@ -20,6 +20,7 @@ public class PlayerCards : MonoBehaviour
         }
 	}
 
+    //Set tag to card
     string GetTag(Sprite sp)
     {
         if (sp.name.Contains("volcano") || sp.name.Contains("remington") ||

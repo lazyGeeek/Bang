@@ -53,6 +53,7 @@ public class Pack : MonoBehaviour
         else if (spriteName.Contains("dynamite")) { }
     }
 
+    //Add appaloosa to buff zone
     private void SetAppaloosa()
     {
         for (int i = 0; i < Player.buffs.Count; ++i)

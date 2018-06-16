@@ -17,26 +17,31 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        //Find and add player character image to script
         character = GameObject.FindGameObjectWithTag("PlayerCharacter").GetComponent<Image>();
         character.sprite = ComponentPreload.GetCharacter();
 
+        //Find and add player role image to script
         role = character = GameObject.FindGameObjectWithTag("PlayerRole").GetComponent<Image>();
         role.sprite = ComponentPreload.GetRole();
-
+        
+        //Find and add player wepon image to script
         weapon = GameObject.FindGameObjectWithTag("PlayerWeapon").GetComponent<Image>();
 
+        //Set player health
         if (character.sprite.name.Contains("paul_regred") || character.sprite.name.Contains("el_gringo")) maxHealth--;
         if (role.sprite.name.Contains("sheriff")) maxHealth++;
-
-        hand.Add(Resources.Load<Sprite>("Images/Pack/appaloosa_ace_spades"));
 
         for (int i = 0; i < maxHealth; i++)
         {
             health[i].gameObject.SetActive(true);
             hand.Add(PackAndDiscard.GetCard());
         }
+        //For test
+        hand.Add(Resources.Load<Sprite>("Images/Pack/appaloosa_ace_spades"));
     }
 
+    //Set maximum range to distance
     static int GetPlayerDistance()
     {
         string spreiteName = weapon.sprite.name;

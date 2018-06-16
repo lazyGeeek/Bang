@@ -7,6 +7,7 @@ public class PackAndDiscard
     static List<Sprite> pack = new List<Sprite>(Resources.LoadAll<Sprite>("Images/Pack"));
     static List<Sprite> discard = new List<Sprite>();
 
+    //Random select card
     public static Sprite GetCard()
     {
         if (pack.Count == 0)
@@ -16,7 +17,7 @@ public class PackAndDiscard
         discard.Add(sprite);
         return sprite;
     }
-
+    
     static void RemixPack()
     {
         pack.AddRange(discard);
