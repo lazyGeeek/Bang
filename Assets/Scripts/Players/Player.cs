@@ -11,9 +11,13 @@ public class Player : MonoBehaviour
     public static Image weapon;
     public static List<Sprite> hand = new List<Sprite>();
     public static List<Sprite> buffs = new List<Sprite>();
-    public static bool hasScope = false;
 
     int maxHealth = 4;
+    public static int scope = 1;
+    public static bool hasShield = false;
+    public static bool onHorse = false;
+    public static bool inJail = false;
+    public static bool inRage = false;
 
     private void Awake()
     {
@@ -39,6 +43,10 @@ public class Player : MonoBehaviour
         }
         //For test
         hand.Add(Resources.Load<Sprite>("Images/Pack/appaloosa_ace_spades"));
+        hand.Add(Resources.Load<Sprite>("Images/Pack/barrel_king_spades"));
+        hand.Add(Resources.Load<Sprite>("Images/Pack/dynamite_2_hearts"));
+        hand.Add(Resources.Load<Sprite>("Images/Pack/mustang_8_hearts"));
+        hand.Add(Resources.Load<Sprite>("Images/Pack/rage_10_clubs"));
     }
 
     //Set maximum range to distance

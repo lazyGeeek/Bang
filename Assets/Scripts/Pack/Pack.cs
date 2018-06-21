@@ -36,8 +36,28 @@ public class Pack : MonoBehaviour
         else
             Destroy(this.gameObject);
 
+        Player.scope -= GetScope(Player.weapon.sprite.name);
         Player.weapon.sprite = tempSprite;
         Player.hand.Remove(tempSprite);
+        Player.scope += GetScope(Player.weapon.sprite.name);
+    }
+
+    int GetScope(string name)
+    {
+        if (name.Contains("colt"))
+        {
+            if (name.Contains("colt_default"))
+                return 1;
+            else
+                return 2;
+        }
+        else if (name.Contains("remington"))
+            return 3;
+        else if (name.Contains("carabine"))
+            return 4;
+        else if (name.Contains("volcano"))
+            return 5;
+        return 1;
     }
 
     //Check what kind of buff
@@ -46,19 +66,38 @@ public class Pack : MonoBehaviour
         string spriteName = currentButton.image.sprite.name;
 
         if (spriteName.Contains("appaloosa"))
-            SetAppaloosa();
-        else if (spriteName.Contains("barrel")) { }
-        else if (spriteName.Contains("mustang")) { }
-        else if (spriteName.Contains("jail")) { }
-        else if (spriteName.Contains("dynamite")) { }
+        {
+            SetBuffToPlayer();
+            Player.scope++;
+        }
+        else if (spriteName.Contains("barrel"))
+        {
+            SetBuffToPlayer();
+            Player.hasShield = true;
+        }
+        else if (spriteName.Contains("mustang"))
+        {
+            SetBuffToPlayer();
+            Player.onHorse = true;
+        }
+        else if (spriteName.Contains("jail"))
+        {
+
+        }
+        else if (spriteName.Contains("dynamite"))
+        {
+            SetBuffToPlayer();
+        }
+        else if (spriteName.Contains("rage"))
+        {
+            SetBuffToPlayer();
+            Player.inRage = true;
+        }
     }
 
-    //Add appaloosa to buff zone
-    private void SetAppaloosa()
+    //Add buff to buff zone
+    private void SetBuffToPlayer()
     {
-        for (int i = 0; i < Player.buffs.Count; ++i)
-            Debug.Log(Player.buffs[i].name);
-        Player.hasScope = true;
         Canvas playerBuffZone = GameObject.FindGameObjectWithTag("PlayerBuffs").GetComponent<Canvas>();
         Image newBuff = Instantiate(Player.weapon, playerBuffZone.transform);
         newBuff.sprite = currentButton.image.sprite;
