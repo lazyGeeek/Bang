@@ -11,7 +11,7 @@ public class PlayerCards : MonoBehaviour
     //Create player card in new Zone
     private void Awake ()
     {
-        foreach(Sprite sp in Player.hand)
+        foreach(Sprite sp in Player.characterInfo.hand)
         {
             Button button = Instantiate<Button>(buttonTemplate, cardSpawn.transform);
             button.image.sprite = sp;

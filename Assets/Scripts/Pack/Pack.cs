@@ -28,18 +28,18 @@ public class Pack : MonoBehaviour
     {
         Sprite tempSprite = currentButton.image.sprite;
 
-        if (!Player.weapon.sprite.name.Contains("colt_default"))
+        if (!Player.characterInfo.weapon.sprite.name.Contains("colt_default"))
         {
-            Player.hand.Add(Player.weapon.sprite);
-            currentButton.image.sprite = Player.weapon.sprite;
+            Player.characterInfo.hand.Add(Player.characterInfo.weapon.sprite);
+            currentButton.image.sprite = Player.characterInfo.weapon.sprite;
         }
         else
             Destroy(this.gameObject);
 
-        Player.scope -= GetScope(Player.weapon.sprite.name);
-        Player.weapon.sprite = tempSprite;
-        Player.hand.Remove(tempSprite);
-        Player.scope += GetScope(Player.weapon.sprite.name);
+        Player.characterInfo.scope -= GetScope(Player.characterInfo.weapon.sprite.name);
+        Player.characterInfo.weapon.sprite = tempSprite;
+        Player.characterInfo.hand.Remove(tempSprite);
+        Player.characterInfo.scope += GetScope(Player.characterInfo.weapon.sprite.name);
     }
 
     int GetScope(string name)
@@ -68,17 +68,17 @@ public class Pack : MonoBehaviour
         if (spriteName.Contains("appaloosa"))
         {
             SetBuffToPlayer();
-            Player.scope++;
+            Player.characterInfo.scope++;
         }
         else if (spriteName.Contains("barrel"))
         {
             SetBuffToPlayer();
-            Player.hasShield = true;
+            Player.characterInfo.hasShield = true;
         }
         else if (spriteName.Contains("mustang"))
         {
             SetBuffToPlayer();
-            Player.onHorse = true;
+            Player.characterInfo.onHorse = true;
         }
         else if (spriteName.Contains("jail"))
         {
@@ -91,7 +91,7 @@ public class Pack : MonoBehaviour
         else if (spriteName.Contains("rage"))
         {
             SetBuffToPlayer();
-            Player.inRage = true;
+            Player.characterInfo.inRage = true;
         }
     }
 
@@ -99,11 +99,11 @@ public class Pack : MonoBehaviour
     private void SetBuffToPlayer()
     {
         Canvas playerBuffZone = GameObject.FindGameObjectWithTag("PlayerBuffs").GetComponent<Canvas>();
-        Image newBuff = Instantiate(Player.weapon, playerBuffZone.transform);
+        Image newBuff = Instantiate(Player.characterInfo.weapon, playerBuffZone.transform);
         newBuff.sprite = currentButton.image.sprite;
         newBuff.name = newBuff.sprite.name;
-        Player.buffs.Add(newBuff.sprite);
-        Player.hand.Remove(newBuff.sprite);
+        Player.characterInfo.buffs.Add(newBuff.sprite);
+        Player.characterInfo.hand.Remove(newBuff.sprite);
         Destroy(this.gameObject);
     }
 }

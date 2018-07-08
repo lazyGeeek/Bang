@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bot4 : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+public class Bot4 : BotAction
+{
+    void Awake()
+    {
+        characterInfo = new CharacterInfo(this.gameObject, 1);
+    }
 }
