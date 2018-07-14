@@ -9,16 +9,17 @@ public class PlayerCards : MonoBehaviour
     [SerializeField] private Button buttonTemplate;
 
     //Create player card in new Zone
-    private void Awake ()
+    /*public void ShowCard(Character c)
     {
-        foreach(Sprite sp in Player.characterInfo.hand)
+        foreach(Sprite sp in c.Hand)
         {
-            Button button = Instantiate<Button>(buttonTemplate, cardSpawn.transform);
+            Button button = Instantiate(buttonTemplate, cardSpawn.transform);
             button.image.sprite = sp;
             button.tag = GetTag(sp);
             button.name = sp.name;
         }
 	}
+
 
     //Set tag to card
     string GetTag(Sprite sp)
@@ -29,11 +30,13 @@ public class PlayerCards : MonoBehaviour
             sp.name.Contains("dynamite") || sp.name.Contains("jail") ||
             sp.name.Contains("mustang") || sp.name.Contains("rage")) return "Buff";
         return "Act";
-    }
+    }*/
 
     //Close(delete) zone
     public void Close()
     {
-        Destroy(this.gameObject);
+        foreach (Button b in cardSpawn.GetComponentsInChildren<Button>())
+            Destroy(b.gameObject);
+        gameObject.SetActive(false);
     }
 }

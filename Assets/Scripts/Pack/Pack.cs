@@ -1,18 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class Pack : MonoBehaviour
 {
-    Button currentButton;
+    [SerializeField] Button currentButton;
+    public Character character;
 
     //Checking card tag (gun, buff, etc.)
-    public void CheckTag(Button btn)
+    public void CheckTag()
     {
-        currentButton = btn;
-
-        switch (this.tag)
+        switch (tag)
         {
             case "Gun":
                 ChangePlayerGun();
@@ -28,18 +25,18 @@ public class Pack : MonoBehaviour
     {
         Sprite tempSprite = currentButton.image.sprite;
 
-        if (!Player.characterInfo.weapon.sprite.name.Contains("colt_default"))
+        if (!character.Weapon.name.Contains("colt_default"))
         {
-            Player.characterInfo.hand.Add(Player.characterInfo.weapon.sprite);
-            currentButton.image.sprite = Player.characterInfo.weapon.sprite;
+            character.Hand.Add(character.Weapon);
+            currentButton.image.sprite = character.Weapon;
         }
         else
             Destroy(this.gameObject);
 
-        Player.characterInfo.scope -= GetScope(Player.characterInfo.weapon.sprite.name);
-        Player.characterInfo.weapon.sprite = tempSprite;
-        Player.characterInfo.hand.Remove(tempSprite);
-        Player.characterInfo.scope += GetScope(Player.characterInfo.weapon.sprite.name);
+        character.Scope -= Actions.GetScope(character.Weapon);
+        character.Weapon = tempSprite;
+        character.Hand.Add(tempSprite);
+        character.Scope += Actions.GetScope(character.Weapon);
     }
 
     int GetScope(string name)
@@ -67,18 +64,18 @@ public class Pack : MonoBehaviour
 
         if (spriteName.Contains("appaloosa"))
         {
-            SetBuffToPlayer();
-            Player.characterInfo.scope++;
+            SetBuff();
+            character.Scope++;
         }
         else if (spriteName.Contains("barrel"))
         {
-            SetBuffToPlayer();
-            Player.characterInfo.hasShield = true;
+            SetBuff();
+            character.HasShield = true;
         }
         else if (spriteName.Contains("mustang"))
         {
-            SetBuffToPlayer();
-            Player.characterInfo.onHorse = true;
+            SetBuff();
+            character.OnHorse = true;
         }
         else if (spriteName.Contains("jail"))
         {
@@ -86,24 +83,24 @@ public class Pack : MonoBehaviour
         }
         else if (spriteName.Contains("dynamite"))
         {
-            SetBuffToPlayer();
+            SetBuff();
         }
         else if (spriteName.Contains("rage"))
         {
-            SetBuffToPlayer();
-            Player.characterInfo.inRage = true;
+            SetBuff();
+            character.InRage = true;
         }
     }
 
     //Add buff to buff zone
-    private void SetBuffToPlayer()
+    private void SetBuff()
     {
-        Canvas playerBuffZone = GameObject.FindGameObjectWithTag("PlayerBuffs").GetComponent<Canvas>();
-        Image newBuff = Instantiate(Player.characterInfo.weapon, playerBuffZone.transform);
+        Canvas playerBuffZone = character.transform.Find("BuffZone").GetComponent<Canvas>();
+        Image newBuff = Instantiate(Resources.Load<Image>("ImageTemplate"), playerBuffZone.transform);
         newBuff.sprite = currentButton.image.sprite;
         newBuff.name = newBuff.sprite.name;
-        Player.characterInfo.buffs.Add(newBuff.sprite);
-        Player.characterInfo.hand.Remove(newBuff.sprite);
+        character.Buffs.Add(newBuff.sprite);
+        character.Hand.Remove(newBuff.sprite);
         Destroy(this.gameObject);
     }
 }
