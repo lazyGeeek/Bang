@@ -4,7 +4,20 @@ using UnityEngine.UI;
 public class Pack : MonoBehaviour
 {
     [SerializeField] Button currentButton;
-    public Character character;
+    private Character character;
+    private PlayerCards cardSpawn;
+
+    public Character Charact
+    {
+        get { return character; }
+        set { character = value; }
+    }
+
+    public PlayerCards CardSpawn
+    {
+        get { return cardSpawn; }
+        set { cardSpawn = value; }
+    }
 
     //Checking card tag (gun, buff, etc.)
     public void CheckTag()
@@ -16,6 +29,12 @@ public class Pack : MonoBehaviour
                 break;
             case "Buff":
                 CheckBuff();
+                break;
+            case "Act":
+                CheckAction();
+                break;
+            default:
+                Debug.LogError("Incorrect tag");
                 break;
         }
     }
@@ -31,30 +50,11 @@ public class Pack : MonoBehaviour
             currentButton.image.sprite = character.Weapon;
         }
         else
-            Destroy(this.gameObject);
-
-        character.Scope -= Actions.GetScope(character.Weapon);
+            Destroy(gameObject);
+        
         character.Weapon = tempSprite;
-        character.Hand.Add(tempSprite);
-        character.Scope += Actions.GetScope(character.Weapon);
-    }
-
-    int GetScope(string name)
-    {
-        if (name.Contains("colt"))
-        {
-            if (name.Contains("colt_default"))
-                return 1;
-            else
-                return 2;
-        }
-        else if (name.Contains("remington"))
-            return 3;
-        else if (name.Contains("carabine"))
-            return 4;
-        else if (name.Contains("volcano"))
-            return 5;
-        return 1;
+        character.Hand.Remove(tempSprite);
+        character.Scope = Actions.GetScope(character.Weapon);
     }
 
     //Check what kind of buff
@@ -75,20 +75,65 @@ public class Pack : MonoBehaviour
         else if (spriteName.Contains("mustang"))
         {
             SetBuff();
-            character.OnHorse = true;
+            character.Position++;
         }
         else if (spriteName.Contains("jail"))
         {
-
+            PackAndDiscard.Discard(currentButton.image.sprite);
+            character.Hand.Remove(currentButton.image.sprite);
+            cardSpawn.ShowEnemies(Resources.Load<Button>("jailButton"));
         }
         else if (spriteName.Contains("dynamite"))
         {
-            SetBuff();
+            currentButton.enabled = false;
+
+            PackAndDiscard.Discard(currentButton.image.sprite);
+            character.Hand.Remove(currentButton.image.sprite);
+
+            foreach(Button b in cardSpawn.cardSpawn.GetComponentsInChildren<Button>())
+            {
+                if (b.image.sprite.name != currentButton.image.sprite.name)
+                    Destroy(b.gameObject);
+            }
+            StartCoroutine(cardSpawn.Dynamite(0));
         }
         else if (spriteName.Contains("rage"))
         {
             SetBuff();
             character.InRage = true;
+        }
+    }
+
+    private void CheckAction()
+    {
+        string spriteName = currentButton.image.sprite.name;
+
+        if (spriteName.Contains("bang"))
+        {
+            PackAndDiscard.Discard(currentButton.image.sprite);
+            character.Hand.Remove(currentButton.image.sprite);
+            cardSpawn.ShowEnemiesForBang();
+        }
+        else if (spriteName.Contains("beauty"))
+        {
+            PackAndDiscard.Discard(currentButton.image.sprite);
+            character.Hand.Remove(currentButton.image.sprite);
+            cardSpawn.ShowEnemies(Resources.Load<Button>("beautyEnemy"));
+        }
+        else if (spriteName.Contains("beer"))
+        {
+            if (character.Heal())
+            {
+                PackAndDiscard.Discard(currentButton.image.sprite);
+                character.Hand.Remove(currentButton.image.sprite);
+                cardSpawn.Close();
+            }
+        }
+        else if (spriteName.Contains("duel"))
+        {
+            PackAndDiscard.Discard(currentButton.image.sprite);
+            character.Hand.Remove(currentButton.image.sprite);
+            cardSpawn.ShowEnemies(Resources.Load<Button>("duelButton"));
         }
     }
 
@@ -101,6 +146,36 @@ public class Pack : MonoBehaviour
         newBuff.name = newBuff.sprite.name;
         character.Buffs.Add(newBuff.sprite);
         character.Hand.Remove(newBuff.sprite);
-        Destroy(this.gameObject);
+        Destroy(gameObject);
+    }
+    
+    public void Jail()
+    {
+        character.Jail();
+        cardSpawn.Close();
+    }
+
+    public void Bang()
+    {
+        character.Hit();
+        cardSpawn.Close();
+    }
+
+    public void Beauty()
+    {
+        cardSpawn.ShowEnemyCards(character);
+    }
+
+    public void DropEnemyCard()
+    {
+        PackAndDiscard.Discard(currentButton.image.sprite);
+        character.Hand.Remove(currentButton.image.sprite);
+        cardSpawn.Close();
+    }
+
+    public void StartDuel()
+    {
+        cardSpawn.Close();
+        character.Duel(cardSpawn.players[0]);
     }
 }

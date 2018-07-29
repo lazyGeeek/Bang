@@ -10,19 +10,16 @@ public class Actions : MonoBehaviour
         Instantiate(Resources.Load("PlayerCards"), gameObject.transform.Find("PlayTable"));
     }
 
-    public static void AddBuff(Character a, Sprite s)
+    /*public static void AddBuff(Character a, Sprite s)
     {
         Canvas buffZone = a.transform.Find("BuffZone").GetComponent<Canvas>();
         Image newBuff = Instantiate(Resources.Load<Image>("ImageTemplate"), buffZone.transform);
         newBuff.sprite = s;
         newBuff.name = s.name;
-    }
+    }*/
 
     public static int GetScope(Sprite s)
     {
-        //string spriteName = characterInfo.weapon.sprite.name;
-        //string spriteName = s.name;
-
         if (s.name.Contains("colt") && !s.name.Contains("colt_defalt")) return 2;
         else if (s.name.Contains("remington")) return 3;
         else if (s.name.Contains("carabine")) return 4;

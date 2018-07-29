@@ -14,8 +14,13 @@ public class PackAndDiscard
             RemixPack();
         Sprite sprite = pack[Random.Range(0, pack.Count)];
         pack.Remove(sprite);
-        discard.Add(sprite);
+        //discard.Add(sprite);
         return sprite;
+    }
+
+    public static void Discard(Sprite s)
+    {
+        discard.Add(s);
     }
     
     static void RemixPack()
