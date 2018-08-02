@@ -147,7 +147,7 @@ public class Character : MonoBehaviour
         //For test
         if (name.Contains("Player"))
         {
-            Hand.Add(Resources.Load<Sprite>("Images/Pack/duel_8_clubs"));
+            Hand.Add(Resources.Load<Sprite>("Images/Pack/gatling_10_hearts"));
         }
 
         SetHealth();
@@ -196,15 +196,15 @@ public class Character : MonoBehaviour
 
                     break;
                 }
-                else if (health[i].IsActive())
+                else 
+                if (health[i].IsActive())
                 {
                     health[i].gameObject.SetActive(false);
                     break;
                 }
-                else if (!health[0].IsActive())
-                {
+                else 
+                if (!health[0].IsActive())
                     Debug.Log("He already dead");
-                }
             }
         }
     }
@@ -212,16 +212,12 @@ public class Character : MonoBehaviour
     public bool Heal()
     {
         if (!health[maxHealth - 1].IsActive())
-        {
             foreach (Image h in health)
-            {
                 if (!h.IsActive())
                 {
                     h.gameObject.SetActive(true);
                     return true;
                 }
-            }
-        }
 
         return false;
     }
@@ -232,10 +228,10 @@ public class Character : MonoBehaviour
         character.transform.Find("Jail").gameObject.SetActive(true);
     }
 
-    /*public void Duel(Character enemy)
+    public void Duel(Character enemy)
     {
-        PlayerCards cardSpawn = GameObject.Find("ShowCards").GetComponent<PlayerCards>();
-        cardSpawn.gameObject.SetActive(true);
+        /*PlayerCards cardSpawn = GameObject.Find("ShowCards").GetComponent<PlayerCards>();
+        cardSpawn.gameObject.SetActive(true);*/
 
         int playerCount = Hand.FindAll(l => l.name.Contains("bang")).Count;
         int enemyCount  = enemy.Hand.FindAll(l => l.name.Contains("bang")).Count;
@@ -245,8 +241,8 @@ public class Character : MonoBehaviour
         else
             enemy.Hit();
 
-        //Add draw later
-    }*/
+        //Add visual component later
+    }
 
     public void ShowCards(PlayerCards cardSpawn)
     {
@@ -258,7 +254,7 @@ public class Character : MonoBehaviour
             button.image.sprite = sp;
             button.tag = Actions.GetTag(sp);
             button.name = sp.name;
-            button.GetComponent<Pack>().Charact = this;
+            button.GetComponent<Pack>().Charact   = this;
             button.GetComponent<Pack>().CardSpawn = cardSpawn;
         }
     }

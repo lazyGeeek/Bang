@@ -135,6 +135,11 @@ public class Pack : MonoBehaviour
             character.Hand.Remove(currentButton.image.sprite);
             cardSpawn.ShowEnemies(Resources.Load<Button>("duelButton"));
         }
+        /*else if (spriteName.Contains("gatling"))
+        {
+            PackAndDiscard.Discard(currentButton.image.sprite);
+            character.Hand.Remove(currentButton.image.sprite);
+        }*/
     }
 
     //Add buff to buff zone
@@ -177,5 +182,11 @@ public class Pack : MonoBehaviour
     {
         cardSpawn.Close();
         character.Duel(cardSpawn.players[0]);
+    }
+
+    public void Gatling()
+    {
+        PackAndDiscard.Discard(currentButton.image.sprite);
+        character.Hand.Remove(currentButton.image.sprite);
     }
 }
