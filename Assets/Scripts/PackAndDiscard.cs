@@ -1,29 +1,55 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class PackAndDiscard
+public class PackAndDiscard : MonoBehaviour
 {
-    static List<Sprite> pack = new List<Sprite>(Resources.LoadAll<Sprite>("Images/Pack"));
-    static List<Sprite> discard = new List<Sprite>();
+    [SerializeField]
+    private List<PackAsset> pack;
+
+    public List<CharacterAsset> characters;
+    public List<RoleAsset> roles;
+    
+    private List<PackAsset> discard;
+    
+    public static PackAndDiscard Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    public CharacterAsset GetRandomCharacter()
+    {
+        CharacterAsset character = characters[Random.Range(0, characters.Count)];
+        characters.Remove(character);
+        return character;
+    }
+
+    public RoleAsset GetRandomRole()
+    {
+        RoleAsset role = roles[Random.Range(0, roles.Count)];
+        roles.Remove(role);
+        return role;
+    }
 
     //Random select card
-    public static Sprite GetCard()
+    public PackAsset GetRandomCard()
     {
         if (pack.Count == 0)
             RemixPack();
-        Sprite sprite = pack[Random.Range(0, pack.Count)];
-        pack.Remove(sprite);
-        //discard.Add(sprite);
-        return sprite;
+        PackAsset card = pack[Random.Range(0, pack.Count)];
+        pack.Remove(card);
+        return card;
     }
 
-    public static void Discard(Sprite s)
+    public void Discard(PackAsset s)
     {
         discard.Add(s);
     }
     
-    static void RemixPack()
+    private void RemixPack()
     {
         pack.AddRange(discard);
         discard.Clear();

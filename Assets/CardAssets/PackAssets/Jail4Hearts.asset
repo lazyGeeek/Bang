@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a707b0c0e4a6ce4bbff4579f3a3163e, type: 3}
+  m_Name: Jail4Hearts
+  m_EditorClassIdentifier: 
+  PackSprite: {fileID: 21300000, guid: b9ddb2bd25071054f8520238341e89e4, type: 3}
+  CardType: 1
+  CardName: 11
+  CardRating: 4
+  CardSuit: 2
+  firstStageButton: {fileID: 114740807906931450, guid: 1daa0d2ec6fe51a4382d17577097aef0,
+    type: 2}
+  secondStageButton: {fileID: 114740807906931450, guid: b5476d9879998ba45905d66a52c9b4c9,
+    type: 2}
+  thirdStageButton: {fileID: 0}
