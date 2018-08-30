@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MissedLogic : MonoBehaviour
+[CreateAssetMenu(menuName = "Assets/MissedAsset")]
+public class MissedLogic : PackAsset
 {
-    public static int SBDefense = 0;
-
-    public static void Missed(Character player)
+    public override void OnCardClick()
     {
-
+        if (GlobalVeriable.GameState == EGameState.Defense)
+        {
+            UIElements.Instance.Player.RemoveCardToDiscard(this);
+            UIElements.Instance.CardZone.Close();
+        }
+        else
+            UIElements.Instance.CardZone.ShowMessage("You arent under attack");
     }
 }

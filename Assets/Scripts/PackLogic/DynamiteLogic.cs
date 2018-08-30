@@ -3,27 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DynamiteLogic : MonoBehaviour
+[CreateAssetMenu(menuName = "Assets/DynamiteAsset")]
+public class DynamiteLogic : PackAsset
 {
     [SerializeField]
-    private GameObject explosion;
+    private GameObject explosionAnimation;
 
     [SerializeField]
-    private Image dynamiteCard;
+    private AudioClip explosioAC;
 
-    [SerializeField]
-    private AudioSource audioS;
-
-    public static DynamiteLogic Instance;
+    private static DynamiteLogic Instance;
 
     private void Awake()
     {
         Instance = this;
     }
 
-    public IEnumerator DynamiteCoroutine(int pos)
+    public override void OnCardClick()
     {
-        ShowCards.Instance.ShowCardSpawn();
+        GlobalVeriable.IsDynamite = true;
+        GlobalVeriable.DynamiteInit = UIElements.Instance.Player;
+        UIElements.Instance.Player.RemoveCardToDiscard(this);
+        Destroy(CurrentCard.gameObject);
+        UIElements.Instance.CardZone.ShowMessage("You throw dynamite");
+    }
+
+    public static void Dynamite(int pos)
+    {
+        UIElements.Instance.CardZone.ShowCardSpawn();
 
         Character[] AllCharacters =
         {
@@ -34,20 +41,28 @@ public class DynamiteLogic : MonoBehaviour
             UIElements.Instance.Enemies[3],
         };
 
-        Image player = Instantiate(dynamiteCard, ShowCards.Instance.cardSpawn.transform);
-        Image card = Instantiate(dynamiteCard, ShowCards.Instance.cardSpawn.transform);
+        GameObject emptyObject = new GameObject();
+
+        GameObject playerObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
+        Image player = playerObject.AddComponent<Image>();
+        AudioSource explosion = playerObject.AddComponent<AudioSource>();
+        explosion.clip = Instance.explosioAC;
+
+        GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
+        Image card = cardObject.AddComponent<Image>();
+
+        Destroy(emptyObject);
 
         while (true)
         {
             Character character = AllCharacters[pos++];
-            player.sprite = character.CharacterInfo.CharacterSprite;
+            player.sprite = character.CharacterImage.sprite;
             PackAsset cardAsset = PackAndDiscard.Instance.GetRandomCard();
             card.sprite = cardAsset.PackSprite;
 
             if (cardAsset.CardSuit == ECardSuit.Spades && (int)cardAsset.CardRating >= 2 && (int)cardAsset.CardRating < 10)
             {
-                Instantiate(audioS, player.transform);
-                Instantiate(explosion, player.transform);
+                explosion.Play();
 
                 for (int j = 0; j < 3; ++j)
                 {
@@ -56,7 +71,7 @@ public class DynamiteLogic : MonoBehaviour
                 }
                 
                 PackAndDiscard.Instance.Discard(cardAsset);
-                yield break;
+                break;
             }
 
             if (pos == AllCharacters.Length)
@@ -64,55 +79,7 @@ public class DynamiteLogic : MonoBehaviour
             
             PackAndDiscard.Instance.Discard(cardAsset);
 
-            yield return new WaitForSeconds(2f);
+            Actions.Wait(2f);
         }
-
-        /*while (true)
-        {
-            player.sprite = UIElements.Instance.Enemies[i].CharacterInfo.CharacterSprite;
-            PackAsset cardAsset = PackAndDiscard.Instance.GetRandomCard();
-            card.sprite = cardAsset.PackSprite;
-
-            if (reg.IsMatch(card.sprite.name))
-            {
-                for (int j = 0; j < 3; ++j)
-                    UIElements.Instance.Enemies[i].Hit();
-
-                yield return new WaitForSeconds(2f);
-                PackAndDiscard.Instance.Discard(cardAsset);
-                UIElements.Instance.ShowCards.Close();
-                yield break;
-            }
-
-            do
-            {
-                if (++i == UIElements.Instance.Enemies.Length)
-                {
-                    i = 0;
-                    if (!UIElements.Instance.Player.IsDead)
-                    {
-                        player.sprite = UIElements.Instance.Player.CharacterInfo.CharacterSprite;
-
-                        cardAsset = PackAndDiscard.Instance.GetRandomCard();
-                        card.sprite = cardAsset.PackSprite;
-
-                        if (reg.IsMatch(card.sprite.name))
-                        {
-                            for (int j = 0; j < 3; ++j)
-                                UIElements.Instance.Player.Hit();
-
-                            yield return new WaitForSeconds(2f);
-                            PackAndDiscard.Instance.Discard(cardAsset);
-                            UIElements.Instance.ShowCards.Close();
-                            yield break;
-                        }
-                    }
-                }
-            } while (UIElements.Instance.Enemies[i].IsDead);
-
-            PackAndDiscard.Instance.Discard(cardAsset);
-
-            yield return new WaitForSeconds(2f);
-        }*/
     }
 }

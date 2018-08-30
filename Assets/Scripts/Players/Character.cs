@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,22 +11,23 @@ public enum ECharacterType
 
 public class Character : MonoBehaviour
 {
-    //Zone for displaying all buffs
-    [SerializeField]
-    private GameObject buffZone;
-
-    [SerializeField]
-    private Image characterImage;
-
     //If player get to jail activate this object
     [SerializeField]
     private Image jailImage;
+    public Image JailImage
+    {
+        get { return jailImage; }
+    }
 
     [SerializeField]
     private Image roleImage;
 
     [SerializeField]
     private Image backRoleImage;
+    public Image BackRoleImage
+    {
+        get { return backRoleImage; }
+    }
 
     [SerializeField]
     private Image weaponImage;
@@ -37,10 +37,18 @@ public class Character : MonoBehaviour
 
     [SerializeField]
     private CanvasGroup bulletHole;
+    public CanvasGroup BulletHole
+    {
+        get { return bulletHole; }
+    }
 
     [SerializeField]
-    private Image[] health;
-    
+    private Image[] _health;
+    public Image[] Health
+    {
+        get { return _health; }
+    }
+
     //Enemy position relative to the player
     [SerializeField]
     private int position;
@@ -51,27 +59,25 @@ public class Character : MonoBehaviour
     }
 
     [SerializeField]
-    private ECharacterType type;
-
-    private List<PackAsset> hand = new List<PackAsset>();
-    public List<PackAsset> Hand
+    private ECharacterType _type;
+    public ECharacterType Type
     {
-        get { return hand; }
+        get { return _type; }
     }
 
-    private List<PackAsset> buffs = new List<PackAsset>();
+    private List<PackAsset> _hand = new List<PackAsset>();
+    public List<PackAsset> Hand
+    {
+        get { return _hand; }
+    }
+
+    private List<PackAsset> _buffs = new List<PackAsset>();
     public List<PackAsset> Buffs
     {
-        get { return buffs; }
+        get { return _buffs; }
     }
 
     public List<PackAsset> UsedCard = new List<PackAsset>(); //Used cards per turn
-
-    private CharacterAsset characterInfo;
-    public CharacterAsset CharacterInfo
-    {
-        get { return characterInfo; }
-    }
 
     private RoleAsset roleInfo;
     public RoleAsset RoleInfo
@@ -79,10 +85,13 @@ public class Character : MonoBehaviour
         get { return roleInfo; }
     }
 
-    private int maxHealth;
+    private int maxHealth = 4;
     
     public bool IsDead { get; set; }
+    public bool InJail { get; set; }
     public int  Scope { get; set; } //Scope of current gun
+    public Image CharacterImage;
+    public GameObject BuffZone; //Zone for displaying all buffs
 
     private PackAsset weapon;
     public PackAsset Weapon
@@ -91,61 +100,85 @@ public class Character : MonoBehaviour
         set
         {
             if (value == null)
+            {
+                Scope -= Actions.GetScope(weapon);
                 defaultWeaponImage.gameObject.SetActive(true);
+                weapon = null;
+            }
             else
             {
+                Scope -= Actions.GetScope(weapon);
                 weaponImage.sprite = value.PackSprite;
+                Scope += Actions.GetScope(value);
                 defaultWeaponImage.gameObject.SetActive(false);
             }
         }
     }
     
+    /*public static bool operator ==(Character ch1, Character ch2)
+    {
+        return ch1 != null && ch2 != null && ch1.CharacterImage.sprite == ch2.CharacterImage.sprite &&
+               ch1.roleImage.sprite == ch2.roleImage.sprite &&
+               ch1.position == ch2.position;
+    }
+
+    public static bool operator !=(Character ch1, Character ch2)
+    {
+        return !(ch1 == ch2);
+    }
+
+    public static bool Equals(Character ch1, Character ch2)
+    {
+        return ch1 == ch2;
+    }
+
+    public virtual bool Equals(Character ch)
+    {
+        return this == ch;
+    }*/
+
     private void Start()
     {
-        characterInfo = PackAndDiscard.Instance.GetRandomCharacter();
-        characterImage.sprite = characterInfo.CharacterSprite;
-        maxHealth = characterInfo.MaxHealth;
-
+        CharacterImage.sprite = PackAndDiscard.Instance.GetRandomCharacter();
         roleInfo = PackAndDiscard.Instance.GetRandomRole();
         roleImage.sprite = roleInfo.RoleSpite;
+
+        if (CharacterImage.sprite.name.Contains("el_gringo") || CharacterImage.sprite.name.Contains("paul_regred"))
+            maxHealth--;
+
         if (roleInfo.Role == ERole.Sheriff)
             maxHealth++;
-        if (roleInfo.Role == ERole.Sheriff || type == ECharacterType.Player)
+        if (roleInfo.Role == ERole.Sheriff || _type == ECharacterType.Player)
             backRoleImage.gameObject.SetActive(false);
 
         Scope = 1;
         IsDead = false;
 
         SetHealth();
-        
-        if (characterInfo.Name == ECharacterName.PaulRegred)
-            Position++;
-        else if (characterInfo.Name == ECharacterName.RoseDoolan)
-            Scope++;
     }
 
     private void SetHealth()
     {
         for (int i = 0; i < maxHealth; i++)
         {
-            health[i].gameObject.SetActive(true);
-            AddCardToHand(PackAndDiscard.Instance.GetRandomCard());
+            Health[i].gameObject.SetActive(true);
+            Hand.Add(PackAndDiscard.Instance.GetRandomCard());
         }
     }
 
     public void AddCardToHand(PackAsset card)
     {
-        hand.Add(card);
+        Hand.Add(card);
     }
 
     public void RemoveCardFromHand(PackAsset card)
     {
-        hand.Remove(card);
+        Hand.Remove(card);
     }
 
     public void RemoveCardToDiscard(PackAsset card)
     {
-        hand.Remove(card);
+        Hand.Remove(card);
         PackAndDiscard.Instance.Discard(card);
     }
 
@@ -153,10 +186,10 @@ public class Character : MonoBehaviour
     {
         Buffs.Add(buff);
         UsedCard.Add(buff);
-        
+
         GameObject image = new GameObject();
         image.AddComponent<Image>();
-        Image newBuff = Instantiate(image.GetComponent<Image>(), buffZone.transform);
+        Image newBuff = Instantiate(image.GetComponent<Image>(), BuffZone.transform);
         newBuff.sprite = buff.PackSprite;
         Destroy(image);
 
@@ -171,7 +204,7 @@ public class Character : MonoBehaviour
         Buffs.Remove(buff);
         PackAndDiscard.Instance.Discard(buff);
 
-        foreach (Image buffImage in buffZone.GetComponentsInChildren<Image>())
+        foreach (Image buffImage in BuffZone.GetComponentsInChildren<Image>())
         {
             if (buffImage.sprite == buff.PackSprite)
                 Destroy(buffImage);
@@ -183,72 +216,61 @@ public class Character : MonoBehaviour
             Position--;
     }
 
-    public void Hit(Character enemy = null) //TODO Complete this
+    public void Hit(Character enemy = null)
     {
-        if (!health[1].IsActive() && health[0].IsActive())
+        if (!Health[1].IsActive() && Health[0].IsActive())
         {
-            health[0].gameObject.SetActive(false);
+            Health[0].gameObject.SetActive(false);
             IsDead = true;
 
-            backRoleImage.gameObject.SetActive(false);
-
-            //Complete for death
+            BackRoleImage.gameObject.SetActive(false);
+            Death(enemy);
 
             return;
         }
 
         for (int i = maxHealth - 1; i >= 0; --i)
         {
-            if (health[i].IsActive())
+            if (Health[i].IsActive())
             {
-                health[i].gameObject.SetActive(false);
+                Health[i].gameObject.SetActive(false);
                 break;
             }
-            else if (!health[0].IsActive())
+            else if (!Health[0].IsActive())
                 Debug.Log("He already dead");
         }
-        if (enemy != null)
-            CheckCharacterAbilityForHit(enemy);
     }
 
-    private void CheckCharacterAbilityForHit(Character enemy) //TODO Complete this
+    private void Death(Character enemy)
     {
-        if (CharacterInfo.Name == ECharacterName.BartCassidy)
+        List<PackAsset> cards = new List<PackAsset>();
+
+        cards.AddRange(Hand);
+        Hand.Clear();
+        cards.AddRange(Buffs);
+        Buffs.Clear();
+        if (Weapon != null)
+            cards.Add(Weapon);
+        Weapon = null;
+
+        foreach (PackAsset card in cards)
         {
-            if (type == ECharacterType.Player)
-            {
-                ShowCards.Instance.ShowCardSpawn();
-
-                PackAsset randomCard = PackAndDiscard.Instance.GetRandomCard();
-                Image card = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-                card.sprite = randomCard.PackSprite;
-                AddCardToHand(randomCard);
-            }
+            if (enemy != null && enemy.RoleInfo.Role == ERole.Sheriff && RoleInfo.Role == ERole.Assistant)
+                enemy.AddCardToHand(card);
             else
-                AddCardToHand(PackAndDiscard.Instance.GetRandomCard());
+                PackAndDiscard.Instance.Discard(card);
         }
-        else if (CharacterInfo.Name == ECharacterName.ElGringo)
-        {
-            if (type == ECharacterType.Player)
-            {
-                ShowCards.Instance.ShowCardSpawn();
 
-
-            }
-            else
-            {
-                PackAsset randomCard = enemy.Hand[Random.Range(0, enemy.Hand.Count)];
-                enemy.RemoveCardFromHand(randomCard);
-                Hand.Add(randomCard);
-            }
-        }
+        backRoleImage.gameObject.SetActive(false);
+        IsDead = true;
+        FreeFromJail();
     }
 
     public bool Heal()
     {
-        if (!health[maxHealth - 1].IsActive())
+        if (!Health[maxHealth - 1].IsActive())
         {
-            foreach (Image h in health)
+            foreach (Image h in Health)
             {
                 if (!h.IsActive())
                 {
@@ -257,7 +279,7 @@ public class Character : MonoBehaviour
                 }
             }
         }
-                
+
         return false;
     }
 
@@ -268,25 +290,27 @@ public class Character : MonoBehaviour
 
     private IEnumerator ShowBulletHoleCoroutine()
     {
-        bulletHole.alpha = 1f;
+        BulletHole.alpha = 1f;
 
         yield return new WaitForSeconds(1f);
 
-        while (bulletHole.alpha > 0)
+        while (BulletHole.alpha > 0)
         {
-            bulletHole.alpha -= 0.05f;
+            BulletHole.alpha -= 0.05f;
             yield return new WaitForSeconds(0.05f);
         }
     }
 
     public void PutInJail()
     {
-        jailImage.gameObject.SetActive(true);
+        JailImage.gameObject.SetActive(true);
+        InJail = true;
     }
 
     public void FreeFromJail()
     {
-        jailImage.gameObject.SetActive(false);
+        JailImage.gameObject.SetActive(false);
+        InJail = false;
     }
 }
 

@@ -8,15 +8,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a707b0c0e4a6ce4bbff4579f3a3163e, type: 3}
+  m_Script: {fileID: 11500000, guid: 1266e1dd5e0f6514baf29d71c6974d37, type: 3}
   m_Name: Dynamite2Hearts
   m_EditorClassIdentifier: 
   PackSprite: {fileID: 21300000, guid: 8d3d948b7c69edd41ac275fa4d106520, type: 3}
-  CardType: 1
+  CardType: 0
   CardName: 8
   CardRating: 2
   CardSuit: 2
-  firstStageButton: {fileID: 114740807906931450, guid: ef4659f57c8abd74aa976735ffea6c2f,
+  explosionAnimation: {fileID: 1344004779425054, guid: cf102a6f5b0ba3f4d985bb4251c9be80,
     type: 2}
-  secondStageButton: {fileID: 0}
-  thirdStageButton: {fileID: 0}
+  explosioAC: {fileID: 8300000, guid: 645f5c132a88db44cb71677abdd45ed8, type: 3}

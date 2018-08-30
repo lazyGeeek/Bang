@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,14 +12,20 @@ public class Actions : MonoBehaviour
         Instance = this;
     }
 
-    public IEnumerator Wait(float seconds)
+    public static void Wait(float seconds)
+    {
+        Instance.StartCoroutine(WaitCoroutine(seconds));
+    }
+
+    private static IEnumerator WaitCoroutine(float seconds)
     {
         yield return new WaitForSeconds(seconds);
     }
 
     public static int GetScope(PackAsset s)
     {
-        string name = s.PackSprite.name;
+        if (s == null)
+            return 1;
 
         if (s.CardName == ECardName.Colt) return 2;
         else if (s.CardName == ECardName.Remington) return 3;
@@ -29,77 +34,51 @@ public class Actions : MonoBehaviour
         return 1;
     }
 
-    public void ShowPlayerCards()
+    public static Button CreateCard(PackAsset cardAsset)
     {
-        ShowCards.Instance.ShowCardSpawn();
-
-        foreach (PackAsset card in UIElements.Instance.Player.Hand)
-        {
-            Button cardButton = Instantiate(card.firstStageButton, ShowCards.Instance.cardSpawn.transform);
-            cardButton.image.sprite = card.PackSprite;
-            cardButton.GetComponent<Pack>().CurrentCard = card;
-        }
+        GameObject emptyObject = new GameObject();
+        GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
+        Button card = cardObject.AddComponent<Button>();
+        Image cardImage = cardObject.AddComponent<Image>();
+        cardImage.sprite = cardAsset.PackSprite;
+        Destroy(emptyObject);
+        return card;
     }
 
-    //If barrel work return true
-    public static bool CheckBarrel(Character player)
+    public static Button CreateCard(Character ch)
     {
-        ShowCards.Instance.ShowCardSpawn();
-
-        Image playerImage = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-        playerImage.sprite = player.CharacterInfo.CharacterSprite;
-
-        PackAsset randomCard = PackAndDiscard.Instance.GetRandomCard();
-        Image randomCardImage = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-        randomCardImage.sprite = randomCard.PackSprite;
-
-        if (randomCard.CardSuit == ECardSuit.Hearts)
-            return true;
-        else
-            return false;
-
+        GameObject emptyObject = new GameObject();
+        GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
+        Button card = cardObject.AddComponent<Button>();
+        Image cardImage = cardObject.AddComponent<Image>();
+        cardImage.sprite = ch.CharacterImage.sprite;
+        Destroy(emptyObject);
+        return card;
     }
 
-    public static void Duel(Character initPlayer, Character victimPlayer)
+    public static IEnumerable<Character> GetScopeEnemies()
     {
-        ShowCards.Instance.ShowCardSpawn();
-
-        int playerBangCount = initPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang")).Count;
-        int enemyBangCount = victimPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang")).Count;
-
-        Image initPlayerImage = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-        initPlayerImage.sprite = initPlayer.CharacterInfo.CharacterSprite;
-
-        foreach (PackAsset card in initPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang")))
-        {
-            Image initCard = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-            initCard.sprite = card.PackSprite;
-        }
-
-        Image victimImage = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-        victimImage.sprite = victimPlayer.CharacterInfo.CharacterSprite;
-
-        foreach (PackAsset card in victimPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang")))
-        {
-            Image victimCard = ShowCards.Instance.cardSpawn.AddComponent<Image>();
-            victimCard.sprite = card.PackSprite;
-        }
-
-        if (playerBangCount < enemyBangCount)
-            initPlayer.Hit(victimPlayer);
-        else
-            victimPlayer.Hit(initPlayer);
-    }
-
-    /*public static void Indians(Character init)
-    {
-        if (UIElements.Instance.Player != init && UIElements.Instance.Player.Hand.FindAll(l => l.PackSprite.name.Contains("bang")).Count > 0)
-            UIElements.Instance.Player.Hit();
-
         foreach (Character enemy in UIElements.Instance.Enemies)
         {
-            if (enemy != init && enemy.Hand.FindAll(l => l.PackSprite.name.Contains("bang")).Count > 0)
-                enemy.Hit();
+            if (!enemy.IsDead && UIElements.Instance.Player.Scope >= enemy.Position)
+                yield return enemy;
         }
-    }*/
+    }
+
+    public void ShowPlayerCards()
+    {
+        UIElements.Instance.CardZone.ShowCardSpawn();
+
+        GameObject emptyObject = new GameObject();
+        foreach (PackAsset card in UIElements.Instance.Player.Hand)
+        {
+            GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
+            Button cardButton = cardObject.AddComponent<Button>();
+            cardButton.onClick.AddListener(card.OnCardClick);
+            Image cardImage = cardObject.AddComponent<Image>();
+            cardImage.sprite = card.PackSprite;
+            card.CurrentCard = cardButton;
+        }
+        Destroy(emptyObject);
+    }
 }

@@ -66,8 +66,13 @@ public class PackAsset : ScriptableObject
     public ECardName CardName;
     public ECardRating CardRating;
     public ECardSuit CardSuit;
-    public Button firstStageButton;
-    [Header("Not always allowed")]
-    public Button secondStageButton;
-    public Button thirdStageButton;
+    public Button CurrentCard { get; set; }
+    public virtual void OnCardClick()
+    {
+        if (UIElements.Instance.Player.UsedCard.Exists(card => card.CardName == CardName))
+        {
+            UIElements.Instance.CardZone.ShowMessage("You already use this card");
+            return;
+        }
+    }
 }

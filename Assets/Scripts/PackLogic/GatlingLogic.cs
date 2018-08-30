@@ -1,30 +1,57 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class GatlingLogic : MonoBehaviour
+[CreateAssetMenu(menuName = "Assets/GatlingAsset")]
+public class GatlingLogic : PackAsset
 {
-    [SerializeField]
-    private AudioSource audioS;
+    public AudioClip gatlingAudio;
 
-    public static GatlingLogic Instance;
-
-    private void Awake()
+    public override void OnCardClick()
     {
-        Instance = this;
+        base.OnCardClick();
+
+        Gatling(UIElements.Instance.Player, this);
+        Destroy(CurrentCard);
     }
 
-    public void StartGatling(Character init)
+    public static void Gatling(Character initPlayer, GatlingLogic currentCard)
     {
-        audioS.Play();
+        UIElements.Instance.Player.RemoveCardToDiscard(currentCard);
+        UIElements.Instance.Player.UsedCard.Add(currentCard);
+        UIElements.Instance.audioSource.clip = currentCard.gatlingAudio;
+        UIElements.Instance.audioSource.Play();
 
-        if (UIElements.Instance.Player != init && !UIElements.Instance.Player.IsDead)
-            UIElements.Instance.Player.Hit();
+        if (UIElements.Instance.Player.CharacterImage.sprite != initPlayer.CharacterImage.sprite && !UIElements.Instance.Player.IsDead)
+        {
+            List<PackAsset> defenseCard = new List<PackAsset>();
+            defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Missed));
+            defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Beer));
+            defenseCard.AddRange(UIElements.Instance.Player.Buffs.FindAll(card => card.CardName == ECardName.Barrel));
+
+            if (defenseCard.Count < 1)
+            {
+                UIElements.Instance.Player.Hit();
+                UIElements.Instance.Player.ShowBulletHole();
+            }
+            else
+            {
+                UIElements.Instance.CardZone.ShowCardSpawn();
+                UIElements.Instance.CardZone.ClearCardSpawn();
+                GlobalVeriable.GameState = EGameState.Defense;
+
+                foreach (PackAsset card in defenseCard)
+                    Actions.CreateCard(card);
+            }
+        }
 
         foreach (Character enemy in UIElements.Instance.Enemies)
         {
-            if (enemy != init && !enemy.IsDead)
-                enemy.Hit();
+            if (enemy.CharacterImage.sprite != initPlayer.CharacterImage.sprite && !enemy.IsDead)
+                AIDefense.Defense(enemy, initPlayer);
         }
+
+        Actions.Wait(UIElements.Instance.audioSource.time);
     }
 }

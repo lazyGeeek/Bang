@@ -3,30 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IndiansLogic : MonoBehaviour
+[CreateAssetMenu(menuName = "Assets/IndiansAsset")]
+public class IndiansLogic : PackAsset
 {
-    [SerializeField]
-    private AudioSource audioSource;
-    [SerializeField]
-    private Button defenseCard;
+    public AudioClip audioSource;
 
-    public static IndiansLogic Instance;
-
-    private void Awake()
+    public override void OnCardClick()
     {
-        Instance = this;
+        base.OnCardClick();
+
+        Indians(UIElements.Instance.Player, this);
+        Destroy(CurrentCard);
     }
 
-    public void StartIndians(Character init)
+    public static void Indians(Character init, IndiansLogic currentCard)
     {
-        StartCoroutine(IndiansCorountine(init));
-    }
+        init.RemoveCardToDiscard(currentCard);
+        init.UsedCard.Add(currentCard);
 
-    private IEnumerator IndiansCorountine(Character init)
-    {
         foreach (Character enemy in UIElements.Instance.Enemies)
         {
-            if (enemy != init)
+            if (enemy.CharacterImage.sprite != init.CharacterImage.sprite)
             {
                 PackAsset bangCard = enemy.Hand.Exists(asset => asset.CardName == ECardName.Bang) ?
                     enemy.Hand.Find(asset => asset.CardName == ECardName.Bang) : null;
@@ -38,25 +35,37 @@ public class IndiansLogic : MonoBehaviour
             }
         }
 
-        audioSource.Play();
+        UIElements.Instance.audioSource.clip = currentCard.audioSource;
+        UIElements.Instance.audioSource.Play();
 
-        if (UIElements.Instance.Player != init)
+        if (UIElements.Instance.Player.CharacterImage.sprite != init.CharacterImage.sprite)
         {
             GlobalVeriable.GameState = EGameState.Defense;
-            ShowCards.Instance.ShowCardSpawn();
-            ShowCards.Instance.ClearCardSpawn();
+            UIElements.Instance.CardZone.ShowCardSpawn();
+            UIElements.Instance.CardZone.ClearCardSpawn();
 
             if (UIElements.Instance.Player.Hand.Exists(card => card.CardName == ECardName.Bang))
             {
+                GameObject emptyObject = new GameObject();
                 foreach (PackAsset bang in UIElements.Instance.Player.Hand.FindAll(bang => bang.CardName == ECardName.Bang))
                 {
-                    Button card = ShowCards.Instance.cardSpawn.AddComponent<Button>();
-                    card.image.sprite = bang.PackSprite;
-                    card.GetComponent<Pack>().CurrentCard = bang;
+                    GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
+                    Button card = cardObject.AddComponent<Button>();
+                    Image cardImage = cardObject.AddComponent<Image>();
+                    cardImage.sprite = bang.PackSprite;
+                    card.onClick.AddListener(delegate { DropBangCard(bang); });
                 }
+                Destroy(emptyObject);
             }
         }
         else
-            yield return new WaitForSeconds(6f);
+            Actions.Wait(UIElements.Instance.audioSource.time);
+    }
+
+    private static void DropBangCard(PackAsset bangCard)
+    {
+        UIElements.Instance.Player.RemoveCardToDiscard(bangCard);
+        UIElements.Instance.CardZone.ClearCardSpawn();
+        Actions.Instance.ShowPlayerCards();
     }
 }

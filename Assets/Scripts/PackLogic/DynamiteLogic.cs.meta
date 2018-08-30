@@ -3,7 +3,11 @@ guid: 1266e1dd5e0f6514baf29d71c6974d37
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - PackSprite: {instanceID: 0}
+  - explosionAnimation: {fileID: 1344004779425054, guid: cf102a6f5b0ba3f4d985bb4251c9be80,
+      type: 2}
+  - explosioAudio: {fileID: 8300000, guid: 645f5c132a88db44cb71677abdd45ed8, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

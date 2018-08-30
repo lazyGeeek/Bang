@@ -8,7 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a707b0c0e4a6ce4bbff4579f3a3163e, type: 3}
+  m_Script: {fileID: 11500000, guid: ced6a91dd835f42468f52bb0acdfa103, type: 3}
   m_Name: Beauty10Diamonds
   m_EditorClassIdentifier: 
   PackSprite: {fileID: 21300000, guid: 4cc2baacfb25f324f96cbd89bb622511, type: 3}
@@ -16,9 +16,3 @@ MonoBehaviour:
   CardName: 3
   CardRating: 10
   CardSuit: 1
-  firstStageButton: {fileID: 114740807906931450, guid: 1daa0d2ec6fe51a4382d17577097aef0,
-    type: 2}
-  secondStageButton: {fileID: 114195007159207274, guid: b3765c08e81c1034fb34be5894231f04,
-    type: 2}
-  thirdStageButton: {fileID: 114195007159207274, guid: d453f94c93086d247b47c6a54b8a23ee,
-    type: 2}

@@ -7,6 +7,9 @@ public class UIElements : MonoBehaviour
 {
     public Character Player;
     public Character[] Enemies;
+    public ShowCards CardZone;
+    public Sprite BackCard;
+    public AudioSource audioSource;
 
     public static UIElements Instance;
 

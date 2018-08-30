@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: a86ce8e05f1c14f428e470ea7332840f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - PackSprite: {instanceID: 0}
+  - shootAC: {fileID: 8300000, guid: eae7eaed566e8df4f8b2801f0c039873, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

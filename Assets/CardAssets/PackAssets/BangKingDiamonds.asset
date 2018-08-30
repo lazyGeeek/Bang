@@ -8,7 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a707b0c0e4a6ce4bbff4579f3a3163e, type: 3}
+  m_Script: {fileID: 11500000, guid: a86ce8e05f1c14f428e470ea7332840f, type: 3}
   m_Name: BangKingDiamonds
   m_EditorClassIdentifier: 
   PackSprite: {fileID: 21300000, guid: 49850922cab8f614985a92f3b0afc014, type: 3}
@@ -16,8 +16,4 @@ MonoBehaviour:
   CardName: 1
   CardRating: 13
   CardSuit: 1
-  firstStageButton: {fileID: 114740807906931450, guid: 62584392473147444b29326cbe49a02c,
-    type: 2}
-  secondStageButton: {fileID: 114195007159207274, guid: 631ce43c43f931141a81966b9db71301,
-    type: 2}
-  thirdStageButton: {fileID: 0}
+  shootAC: {fileID: 8300000, guid: eae7eaed566e8df4f8b2801f0c039873, type: 3}

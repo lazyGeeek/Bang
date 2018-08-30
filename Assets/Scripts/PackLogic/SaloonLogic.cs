@@ -1,36 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class SaloonLogic : MonoBehaviour
+[CreateAssetMenu(menuName = "Assets/SaloonAsset")]
+public class SaloonLogic : PackAsset
 {
-    /*public void OnSaloonClick()
+    public override void OnCardClick()
     {
-        Saloon(UIElements.Instance.Player);
-    }*/
+        base.OnCardClick();
 
-    public static void Saloon(Character init)
+        Saloon(UIElements.Instance.Player, this);
+        Destroy(CurrentCard.gameObject);
+    }
+
+    public static void Saloon(Character init, PackAsset currentCard)
     {
-        if (UIElements.Instance.Player == init)
-        {
-            for (int i = 0; i < 3; ++i)
-            {
-                UIElements.Instance.Player.Heal();
-            }
-        }
-        else
+        init.RemoveCardToDiscard(currentCard);
+        init.UsedCard.Add(currentCard);
+
+        if (!UIElements.Instance.Player.IsDead)
             UIElements.Instance.Player.Heal();
 
         foreach (Character enemy in UIElements.Instance.Enemies)
         {
-            if (enemy == init)
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    UIElements.Instance.Player.Heal();
-                }
-            }
-            else
+            if (!enemy.IsDead)
                 UIElements.Instance.Player.Heal();
         }
     }

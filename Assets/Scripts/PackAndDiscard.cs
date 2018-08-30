@@ -8,10 +8,10 @@ public class PackAndDiscard : MonoBehaviour
     [SerializeField]
     private List<PackAsset> pack;
 
-    public List<CharacterAsset> characters;
+    public List<Sprite> characters;
     public List<RoleAsset> roles;
-    
-    private List<PackAsset> discard;
+
+    private List<PackAsset> discard = new List<PackAsset>();
     
     public static PackAndDiscard Instance;
 
@@ -20,9 +20,9 @@ public class PackAndDiscard : MonoBehaviour
         Instance = this;
     }
 
-    public CharacterAsset GetRandomCharacter()
+    public Sprite GetRandomCharacter()
     {
-        CharacterAsset character = characters[Random.Range(0, characters.Count)];
+        Sprite character = characters[Random.Range(0, characters.Count)];
         characters.Remove(character);
         return character;
     }

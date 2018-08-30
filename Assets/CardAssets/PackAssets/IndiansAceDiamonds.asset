@@ -8,7 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a707b0c0e4a6ce4bbff4579f3a3163e, type: 3}
+  m_Script: {fileID: 11500000, guid: 3d26dc497fc43f64daebe0076725b402, type: 3}
   m_Name: IndiansAceDiamonds
   m_EditorClassIdentifier: 
   PackSprite: {fileID: 21300000, guid: 6218ed256f5c9a944a874682701a9f20, type: 3}
@@ -16,7 +16,4 @@ MonoBehaviour:
   CardName: 10
   CardRating: 14
   CardSuit: 1
-  firstStageButton: {fileID: 114740807906931450, guid: f7af5657dedf3e649a3137b6da697ba2,
-    type: 2}
-  secondStageButton: {fileID: 0}
-  thirdStageButton: {fileID: 0}
+  audioSource: {fileID: 8300000, guid: 75b45352438423d4abbdaeb74e0e063e, type: 3}
