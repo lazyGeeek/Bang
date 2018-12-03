@@ -8,9 +8,10 @@ public enum EGameState
     Move
 }
 
-public class GlobalVeriable
+public class GlobalVeriables
 {
-    public static Character CurrentEnemy;
+    public static Character CurrentPlayer;
+    public static Character CurrentSheriff;
     public static PackAsset CurrentCard;
     public static EGameState GameState = EGameState.Move;
     public static bool IsDynamite = false;

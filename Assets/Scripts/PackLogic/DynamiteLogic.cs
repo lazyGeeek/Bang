@@ -21,8 +21,8 @@ public class DynamiteLogic : PackAsset
 
     public override void OnCardClick()
     {
-        GlobalVeriable.IsDynamite = true;
-        GlobalVeriable.DynamiteInit = UIElements.Instance.Player;
+        GlobalVeriables.IsDynamite = true;
+        GlobalVeriables.DynamiteInit = UIElements.Instance.Player;
         UIElements.Instance.Player.RemoveCardToDiscard(this);
         Destroy(CurrentCard.gameObject);
         UIElements.Instance.CardZone.ShowMessage("You throw dynamite");

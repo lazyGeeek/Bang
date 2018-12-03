@@ -11,6 +11,8 @@ public enum ECharacterType
 
 public class Character : MonoBehaviour
 {
+    [SerializeField]
+    private Image imageOfDesk;
     //If player get to jail activate this object
     [SerializeField]
     private Image jailImage;
@@ -115,7 +117,7 @@ public class Character : MonoBehaviour
         }
     }
     
-    /*public static bool operator ==(Character ch1, Character ch2)
+    public static bool operator ==(Character ch1, Character ch2)
     {
         return ch1 != null && ch2 != null && ch1.CharacterImage.sprite == ch2.CharacterImage.sprite &&
                ch1.roleImage.sprite == ch2.roleImage.sprite &&
@@ -127,17 +129,7 @@ public class Character : MonoBehaviour
         return !(ch1 == ch2);
     }
 
-    public static bool Equals(Character ch1, Character ch2)
-    {
-        return ch1 == ch2;
-    }
-
-    public virtual bool Equals(Character ch)
-    {
-        return this == ch;
-    }*/
-
-    private void Start()
+    public void InitiateCharacter()
     {
         CharacterImage.sprite = PackAndDiscard.Instance.GetRandomCharacter();
         roleInfo = PackAndDiscard.Instance.GetRandomRole();
@@ -237,7 +229,7 @@ public class Character : MonoBehaviour
                 break;
             }
             else if (!Health[0].IsActive())
-                Debug.Log("He already dead");
+                Debug.Log("He is already dead");
         }
     }
 
@@ -311,6 +303,21 @@ public class Character : MonoBehaviour
     {
         JailImage.gameObject.SetActive(false);
         InJail = false;
+    }
+
+    public void StartMove()
+    {
+        imageOfDesk.color = new Color(0.8676471f, 0.7360041f, 0.0f);
+        AddCardToHand(PackAndDiscard.Instance.GetRandomCard());
+        AddCardToHand(PackAndDiscard.Instance.GetRandomCard());
+    }
+
+    public bool EndMove()
+    {
+        if (Hand.Count > Health.Length) //TODO show field for drop after fail "if"
+            return false;
+        imageOfDesk.color = Color.white;
+        return true;
     }
 }
 

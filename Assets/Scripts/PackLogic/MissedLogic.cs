@@ -7,7 +7,7 @@ public class MissedLogic : PackAsset
 {
     public override void OnCardClick()
     {
-        if (GlobalVeriable.GameState == EGameState.Defense)
+        if (GlobalVeriables.GameState == EGameState.Defense)
         {
             UIElements.Instance.Player.RemoveCardToDiscard(this);
             UIElements.Instance.CardZone.Close();

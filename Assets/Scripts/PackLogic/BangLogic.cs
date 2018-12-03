@@ -78,7 +78,7 @@ public class BangLogic : PackAsset
             {
                 UIElements.Instance.CardZone.ShowCardSpawn();
                 UIElements.Instance.CardZone.ClearCardSpawn();
-                GlobalVeriable.GameState = EGameState.Defense;
+                GlobalVeriables.GameState = EGameState.Defense;
 
                 foreach (PackAsset card in defenseCard)
                     Actions.CreateCard(card);

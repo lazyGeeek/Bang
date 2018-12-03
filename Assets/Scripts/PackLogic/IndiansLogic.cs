@@ -40,7 +40,7 @@ public class IndiansLogic : PackAsset
 
         if (UIElements.Instance.Player.CharacterImage.sprite != init.CharacterImage.sprite)
         {
-            GlobalVeriable.GameState = EGameState.Defense;
+            GlobalVeriables.GameState = EGameState.Defense;
             UIElements.Instance.CardZone.ShowCardSpawn();
             UIElements.Instance.CardZone.ClearCardSpawn();
 

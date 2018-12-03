@@ -46,10 +46,10 @@ public class ShowCards : MonoBehaviour
     //Close(delete) zone
     public void Close()
     {
-        if (GlobalVeriable.GameState == EGameState.Defense)
+        if (GlobalVeriables.GameState == EGameState.Defense)
         {
             UIElements.Instance.Player.Hit();
-            GlobalVeriable.GameState = EGameState.Move;
+            GlobalVeriables.GameState = EGameState.Move;
         }
 
         ClearCardSpawn();
