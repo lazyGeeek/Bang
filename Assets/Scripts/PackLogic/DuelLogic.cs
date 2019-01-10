@@ -27,6 +27,7 @@ public class DuelLogic : PackAsset
     {
         UIElements.Instance.CardZone.ShowCardSpawn();
         UIElements.Instance.CardZone.ClearCardSpawn();
+        UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false);
         initPlayer.RemoveCardToDiscard(currentCard);
         initPlayer.UsedCard.Add(currentCard);
 
@@ -60,7 +61,7 @@ public class DuelLogic : PackAsset
 
         if (initBang.Count < victimBang.Count)
         {
-            initPlayer.Hit(victimPlayer);
+            initPlayer.Hit(initPlayer);
             initPlayer.ShowBulletHole();
         }
         else

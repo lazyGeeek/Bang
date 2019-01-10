@@ -20,13 +20,14 @@ public class IndiansLogic : PackAsset
     {
         init.RemoveCardToDiscard(currentCard);
         init.UsedCard.Add(currentCard);
+        UIElements.Instance.audioSource.clip = currentCard.audioSource;
+        UIElements.Instance.audioSource.Play();
 
         foreach (Character enemy in UIElements.Instance.Enemies)
         {
-            if (enemy.CharacterImage.sprite != init.CharacterImage.sprite)
+            if (enemy != init)
             {
-                PackAsset bangCard = enemy.Hand.Exists(asset => asset.CardName == ECardName.Bang) ?
-                    enemy.Hand.Find(asset => asset.CardName == ECardName.Bang) : null;
+                PackAsset bangCard = enemy.Hand.Find(asset => asset.CardName == ECardName.Bang);
 
                 if (bangCard != null)
                     enemy.RemoveCardFromHand(bangCard);
@@ -35,19 +36,25 @@ public class IndiansLogic : PackAsset
             }
         }
 
-        UIElements.Instance.audioSource.clip = currentCard.audioSource;
-        UIElements.Instance.audioSource.Play();
-
-        if (UIElements.Instance.Player.CharacterImage.sprite != init.CharacterImage.sprite)
+        if (UIElements.Instance.Player != init && !UIElements.Instance.Player.IsDead)
         {
-            GlobalVeriables.GameState = EGameState.Defense;
-            UIElements.Instance.CardZone.ShowCardSpawn();
-            UIElements.Instance.CardZone.ClearCardSpawn();
+            List<PackAsset> bangs = new List<PackAsset>(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Bang));
 
-            if (UIElements.Instance.Player.Hand.Exists(card => card.CardName == ECardName.Bang))
+            if (bangs.Count == 0)
             {
+                UIElements.Instance.Player.Hit();
+            }
+            else
+            {
+                GlobalVeriables.GameState = EGameState.Defense;
+                UIElements.Instance.CardZone.ShowCardSpawn();
+                UIElements.Instance.CardZone.ClearCardSpawn();
+                UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false);
+                UIElements.Instance.CardZone.ShowPermanentMessage("Drop bang or take hit");
+
                 GameObject emptyObject = new GameObject();
-                foreach (PackAsset bang in UIElements.Instance.Player.Hand.FindAll(bang => bang.CardName == ECardName.Bang))
+
+                foreach (PackAsset bang in bangs)
                 {
                     GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
                     Button card = cardObject.AddComponent<Button>();
@@ -57,6 +64,7 @@ public class IndiansLogic : PackAsset
                 }
                 Destroy(emptyObject);
             }
+            
         }
         else
             Actions.Wait(UIElements.Instance.audioSource.time);
@@ -64,8 +72,15 @@ public class IndiansLogic : PackAsset
 
     private static void DropBangCard(PackAsset bangCard)
     {
-        UIElements.Instance.Player.RemoveCardToDiscard(bangCard);
-        UIElements.Instance.CardZone.ClearCardSpawn();
-        Actions.Instance.ShowPlayerCards();
+        GlobalVeriables.GameState = EGameState.Move;
+        UIElements.Instance.Player.Hand.Remove(bangCard);
+
+        if (GlobalVeriables.CurrentPlayer == UIElements.Instance.Player)
+        {
+            UIElements.Instance.CardZone.ClearCardSpawn();
+            Actions.Instance.ShowPlayerCards();
+        }
+        else
+            UIElements.Instance.CardZone.Close();
     }
 }

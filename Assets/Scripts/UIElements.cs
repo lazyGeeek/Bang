@@ -6,10 +6,13 @@ using UnityEngine.UI;
 public class UIElements : MonoBehaviour
 {
     public Character Player;
-    public Character[] Enemies;
+    public List<Character> Enemies;
     public ShowCards CardZone;
+    public ShowCurrentPlayer CurrentPlayerZone;
     public Sprite BackCard;
     public AudioSource audioSource;
+
+    public List<PackAsset> testCard;
 
     public static UIElements Instance;
 

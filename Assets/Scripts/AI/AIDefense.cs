@@ -7,26 +7,39 @@ public class AIDefense : MonoBehaviour
 {
     public static void Defense(Character victim, Character enemy)
     {
-        if (victim.Hand.Find(card => card.CardName == ECardName.Missed))
+        PackAsset missed = victim.Hand.Find(card => card.CardName == ECardName.Missed);
+
+        if (missed != null)
         {
-            victim.RemoveCardFromHand(victim.Hand.Find(card => card.CardName == ECardName.Missed));
-            UIElements.Instance.CardZone.ShowMessage("You missed!");
+            victim.Hand.Remove(missed);
+
+            if (UIElements.Instance.CardZone.isActiveAndEnabled)
+                UIElements.Instance.CardZone.ShowMessage("You missed!");
+
             return;
         }
-        else if (victim.Hand.Find(card => card.CardName == ECardName.Beer))
+
+        PackAsset barrel = victim.Buffs.Find(asset => asset.CardName == ECardName.Barrel);
+
+        if (barrel != null)
         {
-            victim.RemoveCardFromHand(victim.Hand.Find(card => card.CardName == ECardName.Beer));
-            UIElements.Instance.CardZone.ShowMessage("Enemy heal!");
-            return;
-        }
-        else if (victim.Buffs.Find(asset => asset.CardName == ECardName.Barrel))
-        {
-            victim.RemoveBuff(victim.Buffs.Find(asset => asset.CardName == ECardName.Barrel));
+            victim.RemoveBuff(barrel);
             if (BarrelLogic.CheckBarrel(victim))
             {
-                UIElements.Instance.CardZone.ShowMessage("Enemy behind barrel");
+                if (UIElements.Instance.CardZone.isActiveAndEnabled)
+                    UIElements.Instance.CardZone.ShowMessage("Enemy behind barrel");
                 return;
             }
+        }
+
+        PackAsset beer = victim.Hand.Find(card => card.CardName == ECardName.Beer);
+
+        if (beer != null && victim.CurrentHealth == 1)
+        {
+            victim.Hand.Remove(beer);
+            if (UIElements.Instance.CardZone.isActiveAndEnabled)
+                UIElements.Instance.CardZone.ShowMessage("Enemy heal!");
+            return;
         }
 
         victim.Hit(enemy);

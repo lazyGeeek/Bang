@@ -41,14 +41,12 @@ public class PackAndDiscard : MonoBehaviour
             RemixPack();
         PackAsset card = pack[Random.Range(0, pack.Count)];
         pack.Remove(card);
-        Debug.Log("Now in pack " + pack.Count + " cards");
         return card;
     }
 
     public void Discard(PackAsset s)
     {
         discard.Add(s);
-        Debug.Log("Now in discard " + discard.Count + " cards");
     }
     
     private void RemixPack()

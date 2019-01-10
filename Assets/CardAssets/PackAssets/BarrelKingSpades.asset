@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: BarrelKingSpades
   m_EditorClassIdentifier: 
   PackSprite: {fileID: 21300000, guid: 561d80ad82a223140885045e01e45167, type: 3}
-  CardType: 0
+  CardType: 1
   CardName: 2
   CardRating: 13
   CardSuit: 3

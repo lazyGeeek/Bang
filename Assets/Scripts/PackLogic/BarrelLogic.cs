@@ -14,7 +14,15 @@ public class BarrelLogic : PackAsset
             UIElements.Instance.Player.RemoveCardToDiscard(this);
         }
         else
-            UIElements.Instance.CardZone.ShowMessage("You don't defense");
+        {
+            if (UIElements.Instance.Player.Buffs.Contains(this))
+            {
+                UIElements.Instance.Player.AddBuff(this);
+                UIElements.Instance.Player.Hand.Remove(this);
+            }
+            else
+                UIElements.Instance.CardZone.ShowMessage("You don't defense");
+        }
     }
 
     public static bool CheckBarrel(Character player)

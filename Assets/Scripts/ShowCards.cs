@@ -7,8 +7,16 @@ public class ShowCards : MonoBehaviour
 {
     public GameObject cardSpawn;
     public Button closeButton;
+    public Button dropCardButton;
     public Text messageField;
     
+    public void ShowPermanentMessage(string message)
+    {
+        messageField.text = message;
+
+        messageField.GetComponent<CanvasGroup>().alpha = 1f;
+    }
+
     public void ShowMessage(string message)
     {
         StartCoroutine(ShowMessageCoroutine(message));
@@ -32,6 +40,27 @@ public class ShowCards : MonoBehaviour
     public void ShowCardSpawn()
     {
         gameObject.SetActive(true);
+
+        closeButton.gameObject.SetActive(true);
+
+        if (GlobalVeriables.GameState == EGameState.Defense)
+            dropCardButton.gameObject.SetActive(false);
+        else
+            dropCardButton.gameObject.SetActive(true);
+    }
+
+    public void DropCards()
+    {
+        if (GlobalVeriables.GameState == EGameState.DropCards)
+        {
+            GlobalVeriables.GameState = EGameState.Move;
+            dropCardButton.GetComponentInChildren<Text>().text = "Drop Cards";
+        }
+        else if (GlobalVeriables.GameState == EGameState.Move)
+        {
+            GlobalVeriables.GameState = EGameState.DropCards;
+            dropCardButton.GetComponentInChildren<Text>().text = "Continue Move";
+        }
     }
 
     public void ClearCardSpawn()
@@ -49,10 +78,12 @@ public class ShowCards : MonoBehaviour
         if (GlobalVeriables.GameState == EGameState.Defense)
         {
             UIElements.Instance.Player.Hit();
+            UIElements.Instance.Player.ShowBulletHole();
             GlobalVeriables.GameState = EGameState.Move;
         }
 
         ClearCardSpawn();
+        messageField.GetComponent<CanvasGroup>().alpha = 0f;
         gameObject.SetActive(false);
     }
 }

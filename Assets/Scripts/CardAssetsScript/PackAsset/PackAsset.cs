@@ -1,64 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public enum ECardType
-{
-    Act,
-    Buff,
-    Weapon
-}
-
-public enum ECardName
-{
-    Appaloosa,
-    Bang,
-    Barrel,
-    Beauty,
-    Beer,
-    Carabine,
-    Colt,
-    Duel,
-    Dynamite,
-    Gatling,
-    Indians,
-    Jail,
-    Missed,
-    Mustang,
-    Panic,
-    Rage,
-    Remington,
-    Saloon,
-    Stagecoach,
-    Store,
-    Volcano,
-    WellsFargo
-}
-
-public enum ECardRating
-{
-    Two = 2,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King,
-    Ace
-}
-
-public enum ECardSuit
-{
-    Clubs,
-    Diamonds,
-    Hearts,
-    Spades
-}
-
 public class PackAsset : ScriptableObject
 {
     public Sprite PackSprite;
@@ -67,6 +9,7 @@ public class PackAsset : ScriptableObject
     public ECardRating CardRating;
     public ECardSuit CardSuit;
     public Button CurrentCard { get; set; }
+
     public virtual void OnCardClick()
     {
         if (UIElements.Instance.Player.UsedCard.Exists(card => card.CardName == CardName))
@@ -74,5 +17,26 @@ public class PackAsset : ScriptableObject
             UIElements.Instance.CardZone.ShowMessage("You already use this card");
             return;
         }
+    }
+
+    public static bool operator ==(PackAsset p1, PackAsset p2)
+    {
+        return ReferenceEquals(p1, p2);
+    }
+
+    public static bool operator !=(PackAsset p1, PackAsset p2)
+    {
+        return !(p1 == p2);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
+    public override bool Equals(object other)
+    {
+        if (other == null) return false;
+        return this == (PackAsset)other;
     }
 }

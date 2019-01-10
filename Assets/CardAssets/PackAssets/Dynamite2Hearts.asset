@@ -18,4 +18,4 @@ MonoBehaviour:
   CardSuit: 2
   explosionAnimation: {fileID: 1344004779425054, guid: cf102a6f5b0ba3f4d985bb4251c9be80,
     type: 2}
-  explosioAC: {fileID: 8300000, guid: 645f5c132a88db44cb71677abdd45ed8, type: 3}
+  explosionAC: {fileID: 8300000, guid: 645f5c132a88db44cb71677abdd45ed8, type: 3}

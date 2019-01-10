@@ -21,19 +21,21 @@ public class JailLogic : PackAsset
     {
         if (defendant.RoleInfo.Role == ERole.Sheriff)
         {
-            UIElements.Instance.CardZone.ShowMessage("You cant put sheriff in jail");
+            if (UIElements.Instance.CardZone.gameObject.activeSelf)
+                UIElements.Instance.CardZone.ShowMessage("You cant put sheriff in jail");
             return;
         }
-        else if (!defendant.InJail)
+        else if (defendant.InJail)
         {
-            UIElements.Instance.CardZone.ShowMessage("He already in jail");
+            if (UIElements.Instance.CardZone.gameObject.activeSelf)
+                UIElements.Instance.CardZone.ShowMessage("He is already in jail");
             return;
         }
-
-        defendant.PutInJail();
-
-        init.RemoveCardToDiscard(currentCard);
+        
+        init.Hand.Remove(currentCard);
         init.UsedCard.Add(currentCard);
+        defendant.InJail = true;
+        defendant.AddBuff(currentCard);
         
         if (init.Type == ECharacterType.Player)
         {

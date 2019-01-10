@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +8,7 @@ public class BangLogic : PackAsset
     [SerializeField]
     private AudioClip shootAC;
 
-    public override void OnCardClick()
+    public override void OnCardClick() //TODO refactoring
     {
         if (UIElements.Instance.Player.UsedCard.Exists(card => card.CardName == ECardName.Bang) &&
             !UIElements.Instance.Player.Buffs.Exists(card => card.CardName == ECardName.Rage))
@@ -18,7 +17,7 @@ public class BangLogic : PackAsset
             return;
         }
 
-        List<Character> ScopeEnemies = new List<Character>(Actions.GetScopeEnemies());
+        List<Character> ScopeEnemies = new List<Character>(Actions.GetScopeEnemies(UIElements.Instance.Player));
 
         if (ScopeEnemies.Count == 0)
         {
@@ -55,37 +54,48 @@ public class BangLogic : PackAsset
         }
     }
 
-    public static void Bang(Character killer, Character victim, PackAsset currentCard)
+    public static void Bang(Character killer, Character victim, BangLogic currentCard)
     {
-        killer.RemoveCardToDiscard(currentCard);
+        killer.Hand.Remove(currentCard);
         killer.UsedCard.Add(currentCard);
 
+        UIElements.Instance.audioSource.clip = currentCard.shootAC;
         UIElements.Instance.audioSource.Play();
-
+        
         if (victim.Type == ECharacterType.Player)
         {
             List<PackAsset> defenseCard = new List<PackAsset>();
             defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Missed));
-            defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Beer));
-            defenseCard.AddRange(UIElements.Instance.Player.Buffs.FindAll(card => card.CardName == ECardName.Barrel));
 
-            if (defenseCard.Count < 1)
+            PackAsset barrel = UIElements.Instance.Player.Buffs.Find(card => card.CardName == ECardName.Barrel);
+            if (barrel != null)
+                defenseCard.Add(barrel);
+            
+            if (victim.CurrentHealth == 1)
+                defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Beer));
+
+            if (defenseCard.Count == 0)
             {
-                victim.Hit();
-                victim.ShowBulletHole();
+                UIElements.Instance.Player.Hit();
             }
             else
             {
                 UIElements.Instance.CardZone.ShowCardSpawn();
                 UIElements.Instance.CardZone.ClearCardSpawn();
+                UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false); 
                 GlobalVeriables.GameState = EGameState.Defense;
 
                 foreach (PackAsset card in defenseCard)
+                {
                     Actions.CreateCard(card);
+                }
             }
         }
         else
         {
+            if (!victim.botEnemies.Contains(killer))
+                victim.botEnemies.Add(killer);
+
             AIDefense.Defense(victim, killer);
 
             if (killer.Type == ECharacterType.Player)

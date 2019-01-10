@@ -1,29 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class StartNewGame : MonoBehaviour
 {
-    public Character[] characters; //Index == 0 - Player, 1 - Bot1, 2 - Bot2, etc.
+    public Character[] characters;
     public Image sheriffImage;
-    public GameObject thisObject;
     
-	void Start ()
+	private void Start ()
     {
-        thisObject.SetActive(true);
-
-		foreach (Character ch in characters)
+		foreach (Character character in characters)
         {
-            ch.InitiateCharacter();
+            character.InitiateCharacter();
 
-            if (ch.RoleInfo.Role == ERole.Sheriff)
+            if (character.RoleInfo.Role == ERole.Sheriff)
             {
-                GlobalVeriables.CurrentSheriff = ch;
-                GlobalVeriables.CurrentPlayer = ch;
-                sheriffImage.sprite = ch.CharacterImage.sprite;
-                ch.StartMove();
+                GlobalVeriables.CurrentSheriff = character;
+                GlobalVeriables.CurrentPlayer = character;
+                sheriffImage.sprite = character.CharacterImage.sprite;
             }
         }
-	}
+
+        foreach (Character character in characters)
+        {
+            if (character.Type == ECharacterType.Bot)
+                character.FindEnemy();
+
+            character.FillVisibility();
+        }
+    }
+
+    public void StartGame()
+    {
+        GlobalVeriables.CurrentPlayer.StartMove();
+    }
 }

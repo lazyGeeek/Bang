@@ -27,7 +27,7 @@ public class PanicLogic : PackAsset
         if (victim.Weapon != null)
             victimCard.Add(victim.Weapon);
 
-        if (victimCard.Count < 1)
+        if (victimCard.Count == 0)
             return false;
 
         if (init.Type == ECharacterType.Player)

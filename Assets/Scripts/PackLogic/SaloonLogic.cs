@@ -25,7 +25,7 @@ public class SaloonLogic : PackAsset
         foreach (Character enemy in UIElements.Instance.Enemies)
         {
             if (!enemy.IsDead)
-                UIElements.Instance.Player.Heal();
+                enemy.Heal();
         }
     }
 }
