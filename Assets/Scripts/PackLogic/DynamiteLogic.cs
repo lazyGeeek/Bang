@@ -11,9 +11,11 @@ public class DynamiteLogic : PackAsset
 
     public override void OnCardClick()
     {
-        UIElements.Instance.Player.AddBuff(this);
+        base.OnCardClick();
+
+        GlobalVeriables.Instance.Player.AddBuff(this);
         Destroy(CurrentCard.gameObject);
-        UIElements.Instance.CardZone.ShowMessage("You throw dynamite");
+        GlobalVeriables.Instance.CardZone.ShowMessage("You throw dynamite");
     }
 
     public static void CheckDynamite(Character init, DynamiteLogic dynamite)
@@ -25,8 +27,9 @@ public class DynamiteLogic : PackAsset
 
         if (cardAsset.CardSuit == ECardSuit.Spades && (int)cardAsset.CardRating >= 2 && (int)cardAsset.CardRating < 10)
         {
-            UIElements.Instance.audioSource.clip = dynamite.explosionAC;
-            UIElements.Instance.audioSource.Play();
+            GlobalVeriables.Instance.audioSource.clip = dynamite.explosionAC;
+            GlobalVeriables.Instance.audioSource.Play();
+            PackAndDiscard.Instance.Discard(dynamite);
 
             for (int j = 0; j < 3; ++j)
             {
@@ -35,18 +38,6 @@ public class DynamiteLogic : PackAsset
             }
         }
         else
-        {
-            Character nextPlayer;
-            int nextPlayerIndex = UIElements.Instance.Enemies.FindIndex(player => player == init);
-            
-            if (nextPlayerIndex == -1)
-                nextPlayer = UIElements.Instance.Enemies[0];
-            else if (nextPlayerIndex == 3)
-                nextPlayer = UIElements.Instance.Player;
-            else
-                nextPlayer = UIElements.Instance.Enemies[nextPlayerIndex + 1];
-
-            nextPlayer.AddBuff(dynamite);
-        }
+            init.NextPlayer.AddBuff(dynamite);
     }
 }

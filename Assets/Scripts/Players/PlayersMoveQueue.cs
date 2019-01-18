@@ -4,11 +4,13 @@ using UnityEngine;
 
 public static class PlayersMoveQueue
 {
-    public static void StartNextPlayer()
+    public static IEnumerator StartNextPlayer()
     {
         GlobalVeriables.CurrentPlayer = GlobalVeriables.CurrentPlayer.NextPlayer;
 
-        Actions.Instance.StartCoroutine(UIElements.Instance.CurrentPlayerZone.ShowPlayer(GlobalVeriables.CurrentPlayer.CharacterImage));
+        GlobalVeriables.CurrentPlayer.StartCoroutine(GlobalVeriables.Instance.CurrentPlayerZone.ShowPlayer(GlobalVeriables.CurrentPlayer.CharacterImage));
+
+        yield return new WaitWhile(() => GlobalVeriables.Instance.CurrentPlayerZone.isActiveAndEnabled);
 
         PackAsset dynamite = GlobalVeriables.CurrentPlayer.Buffs.Find(card => card.CardName == ECardName.Dynamite);
         
@@ -27,7 +29,18 @@ public static class PlayersMoveQueue
         }
 
         if (canMove)
-            GlobalVeriables.CurrentPlayer.StartMove();
+        {
+            if (GlobalVeriables.CurrentPlayer == GlobalVeriables.Instance.Player)
+            {
+                ((Player)GlobalVeriables.CurrentPlayer).StartMove();
+                yield return new WaitUntil(() => ((Player)GlobalVeriables.CurrentPlayer).EndMoveBttn.isActiveAndEnabled);
+            }
+            else
+            {
+                ((Bot)GlobalVeriables.CurrentPlayer).StartMove();
+                yield return new WaitUntil(() => ((Bot)GlobalVeriables.CurrentPlayer).UsingCards.activeSelf);
+            }
+        }
     }
 
     private static bool _CheckJail()

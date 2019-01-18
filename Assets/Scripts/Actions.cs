@@ -5,23 +5,6 @@ using UnityEngine.UI;
 
 public class Actions : MonoBehaviour
 {
-    public static Actions Instance;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    public static void Wait(float seconds)
-    {
-        Instance.StartCoroutine(WaitCoroutine(seconds));
-    }
-
-    private static IEnumerator WaitCoroutine(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-    }
-
     public static int GetScope(PackAsset s)
     {
         if (s == null) return 1;
@@ -36,26 +19,26 @@ public class Actions : MonoBehaviour
     public static Button CreateCard(PackAsset cardAsset)
     {
         GameObject cardObject = new GameObject();
-        cardObject.transform.SetParent(UIElements.Instance.CardZone.cardSpawn.transform, false);
+        cardObject.transform.SetParent(GlobalVeriables.Instance.CardZone.cardSpawn.transform, false);
         Button cardButton = cardObject.AddComponent<Button>();
         cardButton.onClick.AddListener(cardAsset.OnCardClick);
         Image cardImage = cardObject.AddComponent<Image>();
         cardImage.sprite = cardAsset.PackSprite;
-        cardAsset.CurrentCard = cardButton;
+        cardAsset.CurrentCard = cardObject;
         return cardButton;
     }
 
     public static Button CreateCard(Character ch)
     {
         GameObject cardObject = new GameObject();
-        cardObject.transform.SetParent(UIElements.Instance.CardZone.cardSpawn.transform, false);
+        cardObject.transform.SetParent(GlobalVeriables.Instance.CardZone.cardSpawn.transform, false);
         Button cardButton = cardObject.AddComponent<Button>();
         Image cardImage = cardObject.AddComponent<Image>();
         cardImage.sprite = ch.CharacterImage.sprite;
         return cardButton;
     }
 
-    public static List<Character> GetScopeEnemies(Character character, bool closeRange = false)
+    public static List<Character> GetScopeEnemies(Character character, bool closeRange)
     {
         List<Character> enemies = new List<Character>();
 
@@ -64,9 +47,14 @@ public class Actions : MonoBehaviour
             int mustang = scope.Key.Buffs.Find(card => card.CardName == ECardName.Mustang) == null ? 0 : 1;
             int appaloosa = character.Buffs.Find(card => card.CardName == ECardName.Appaloosa) == null ? 0 : 1;
 
-            if (!scope.Key.IsDead && character.Scope + appaloosa >= scope.Value + mustang)
+            if (!closeRange)
             {
-                if (!closeRange || (closeRange && scope.Value + mustang <= 1))
+                if ((!scope.Key.IsDead) && ((character.Scope + appaloosa) >= (scope.Value + mustang)))
+                    enemies.Add(scope.Key);
+            }
+            else
+            {
+                if ((!scope.Key.IsDead) && ((1 + appaloosa) >= (scope.Value + mustang)))
                     enemies.Add(scope.Key);
             }
         }
@@ -74,40 +62,16 @@ public class Actions : MonoBehaviour
         return enemies;
     }
 
-    public void ShowPlayerCards() //TODO Check this
+    public static void ShowPlayerCards()
     {
-        UIElements.Instance.CardZone.ShowCardSpawn();
-
-        foreach (PackAsset card in UIElements.Instance.Player.Hand)
+        foreach (PackAsset card in GlobalVeriables.Instance.Player.Hand)
         {
-            GameObject cardObject = new GameObject();
-            cardObject.transform.SetParent(UIElements.Instance.CardZone.cardSpawn.transform, false);
-            Button cardButton = cardObject.AddComponent<Button>();
-            cardButton.onClick.AddListener(card.OnCardClick);
-            Image cardImage = cardObject.AddComponent<Image>();
-            cardImage.sprite = card.PackSprite;
-            card.CurrentCard = cardButton;
+            CreateCard(card);
         }
+    }
 
-        if (GlobalVeriables.GameState == EGameState.Defense)
-        {
-            foreach (PackAsset card in UIElements.Instance.Player.Buffs)
-            {
-                GameObject cardObject = new GameObject();
-                cardObject.transform.SetParent(UIElements.Instance.CardZone.cardSpawn.transform, false);
-                Button cardButton = cardObject.AddComponent<Button>();
-                cardButton.onClick.AddListener(card.OnCardClick);
-                Image buffImage = cardObject.AddComponent<Image>();
-                buffImage.sprite = card.PackSprite;
-                card.CurrentCard = cardButton;
-            }
-
-            /*GameObject weaponObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
-            Button weaponButton = weaponObject.AddComponent<Button>();
-            weaponButton.onClick.AddListener(UIElements.Instance.Player.Weapon.OnCardClick);
-            Image cardImage = weaponObject.AddComponent<Image>();
-            cardImage.sprite = UIElements.Instance.Player.Weapon.PackSprite;
-            UIElements.Instance.Player.Weapon.CurrentCard = weaponButton;*/
-        }
+    public void PlayerCards()
+    {
+        ShowPlayerCards();
     }
 }

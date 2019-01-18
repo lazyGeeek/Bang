@@ -7,13 +7,6 @@ public class ShowCurrentPlayer : MonoBehaviour
 {
     public Image PlayerImage;
 
-    /*public void ShowPlayer(Image playerImage)
-    {
-        gameObject.SetActive(true);
-        PlayerImage.sprite = playerImage.sprite;
-        StartCoroutine(ShowPlayerCoroutine());
-    }*/
-
 	public IEnumerator ShowPlayer(Image playerImage)
     {
         gameObject.SetActive(true);

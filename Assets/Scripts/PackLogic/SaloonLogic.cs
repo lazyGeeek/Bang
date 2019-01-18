@@ -10,19 +10,32 @@ public class SaloonLogic : PackAsset
     {
         base.OnCardClick();
 
-        Saloon(UIElements.Instance.Player, this);
+        _Saloon(GlobalVeriables.Instance.Player, this);
         Destroy(CurrentCard.gameObject);
     }
 
-    public static void Saloon(Character init, PackAsset currentCard)
+    private static void _Saloon(Player init, PackAsset currentCard)
     {
-        init.RemoveCardToDiscard(currentCard);
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
         init.UsedCard.Add(currentCard);
 
-        if (!UIElements.Instance.Player.IsDead)
-            UIElements.Instance.Player.Heal();
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
+        {
+            if (!enemy.IsDead)
+                enemy.Heal();
+        }
+    }
 
-        foreach (Character enemy in UIElements.Instance.Enemies)
+    public static void Saloon(Bot init, PackAsset currentCard)
+    {
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+
+        if (!GlobalVeriables.Instance.Player.IsDead)
+            GlobalVeriables.Instance.Player.Heal();
+
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
         {
             if (!enemy.IsDead)
                 enemy.Heal();

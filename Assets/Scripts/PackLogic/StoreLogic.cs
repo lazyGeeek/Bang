@@ -6,77 +6,98 @@ using UnityEngine.UI;
 [CreateAssetMenu(menuName = "Assets/StoreAsset")]
 public class StoreLogic : PackAsset
 {
-    private static int position = -1;
     private static List<PackAsset> randomCards = new List<PackAsset>();
 
     public override void OnCardClick()
     {
         base.OnCardClick();
-
-        UIElements.Instance.CardZone.ClearCardSpawn();
-        Store(UIElements.Instance.Player, this);
+        
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+        _Store(GlobalVeriables.Instance.Player, this);
     }
 
-    public static void Store(Character init, PackAsset currentCard)
+    private static void _Store(Player init, PackAsset currentCard)
     {
-        init.RemoveCardToDiscard(currentCard);
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
         init.UsedCard.Add(currentCard);
 
-        if (!UIElements.Instance.Player.IsDead)
+        randomCards.Add(PackAndDiscard.Instance.GetRandomCard());
+
+        for (int i = 0; i < GlobalVeriables.Instance.Enemies.Count; i++)
             randomCards.Add(PackAndDiscard.Instance.GetRandomCard());
 
-        for (int i = 0; i < UIElements.Instance.Enemies.Count; ++i)
-        {
-            if (UIElements.Instance.Enemies[i] == init)
-                position = i;
-
-            if (!UIElements.Instance.Enemies[i].IsDead)
-                randomCards.Add(PackAndDiscard.Instance.GetRandomCard());
-        }
-
-        if (position != -1)
-        {
-            for (int i = position; i < UIElements.Instance.Enemies.Count; ++i)
-            {
-                PackAsset enemyChosenCard = AIPickUpCard.PickUpCard(UIElements.Instance.Enemies[i], randomCards);
-                randomCards.Remove(enemyChosenCard);
-                UIElements.Instance.Enemies[i].AddCardToHand(enemyChosenCard);
-            }
-        }
-
-        UIElements.Instance.CardZone.ShowCardSpawn();
-        UIElements.Instance.CardZone.ClearCardSpawn();
-        UIElements.Instance.CardZone.closeButton.gameObject.SetActive(false);
-        UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false);
+        GlobalVeriables.Instance.CardZone.ShowCardSpawn(false, false);
 
         foreach (PackAsset randomCard in randomCards)
         {
             Button card = Actions.CreateCard(randomCard);
-            card.onClick.AddListener(delegate { ContinueStore(randomCard); });
+            card.onClick.AddListener(delegate { _GetCardForPlayer(randomCard); });
         }
     }
 
-    public static void ContinueStore(PackAsset ChoosenCard)
+    private static void _GetCardForPlayer(PackAsset choosenCard)
     {
-        randomCards.Remove(ChoosenCard);
-        UIElements.Instance.Player.AddCardToHand(ChoosenCard);
-        
-        for (int i = 0; i < position; ++i)
+        randomCards.Remove(choosenCard);
+        GlobalVeriables.Instance.Player.Hand.Add(choosenCard);
+
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+        Actions.ShowPlayerCards();
+
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
         {
-            PackAsset enemyChosenCard = AIPickUpCard.PickUpCard(UIElements.Instance.Enemies[i], randomCards);
+            PackAsset enemyChosenCard = AIPickUpCard.PickUpCard(enemy, randomCards);
             randomCards.Remove(enemyChosenCard);
-            UIElements.Instance.Enemies[i].AddCardToHand(enemyChosenCard);
+            enemy.Hand.Add(enemyChosenCard);
         }
 
         foreach (PackAsset randomCard in randomCards)
             PackAndDiscard.Instance.Discard(randomCard);
+    }
 
-        if (GlobalVeriables.CurrentPlayer == UIElements.Instance.Player)
+    public static void Store(Bot init, PackAsset currentCard)
+    {
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+
+        if (!GlobalVeriables.Instance.Player.IsDead)
+            randomCards.Add(PackAndDiscard.Instance.GetRandomCard());
+
+        for (int i = 0; i < GlobalVeriables.Instance.Enemies.Count; i++)
+            randomCards.Add(PackAndDiscard.Instance.GetRandomCard());
+
+        //List<Bot> enemies = new List<Bot>(GlobalVeriables.Instance.Enemies);
+
+        for (int i = GlobalVeriables.Instance.Enemies.FindIndex(pl => pl == init); i < GlobalVeriables.Instance.Enemies.Count; i++)
         {
-            UIElements.Instance.CardZone.ClearCardSpawn();
-            Actions.Instance.ShowPlayerCards();
+            PackAsset enemyChosenCard = AIPickUpCard.PickUpCard(GlobalVeriables.Instance.Enemies[i], randomCards);
+            randomCards.Remove(enemyChosenCard);
+            GlobalVeriables.Instance.Enemies[i].Hand.Add(enemyChosenCard);
         }
-        else
-            UIElements.Instance.CardZone.Close();
+
+        foreach (PackAsset randomCard in randomCards)
+        {
+            Button card = Actions.CreateCard(randomCard);
+            card.onClick.AddListener(delegate { _GetCard(init, randomCard); });
+        }
+    }
+
+    private static void _GetCard(Bot init, PackAsset choosenCard)
+    {
+        randomCards.Remove(choosenCard);
+        GlobalVeriables.Instance.Player.Hand.Add(choosenCard);
+
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+        GlobalVeriables.Instance.CardZone.Close();
+
+        for (int i = 0; i < GlobalVeriables.Instance.Enemies.FindIndex(pl => pl == init); i++)
+        {
+            PackAsset enemyChosenCard = AIPickUpCard.PickUpCard(GlobalVeriables.Instance.Enemies[i], randomCards);
+            randomCards.Remove(enemyChosenCard);
+            GlobalVeriables.Instance.Enemies[i].Hand.Add(enemyChosenCard);
+        }
+
+        foreach (PackAsset randomCard in randomCards)
+            PackAndDiscard.Instance.Discard(randomCard);
     }
 }

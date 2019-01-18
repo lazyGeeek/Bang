@@ -5,102 +5,37 @@ using UnityEngine.UI;
 
 public class Character : MonoBehaviour
 {
-    [SerializeField]
-    private Image _imageOfDesk;
+    [Header("Health")]
+    public Image[] Health;
     
-    [SerializeField]
-    private Image _jailImage;
-    public Image JailImage //If player get to jail activate this object
-    {
-        get { return _jailImage; }
-    }
-    [SerializeField]
-    private Image _roleImage;
+    [Header("Character")]
+    public Image CharacterImage;
+    public Image JailImage;
+    public CanvasGroup BulletHole;
+    public CanvasGroup Barell;
 
-    [SerializeField]
-    private Image _backRoleImage;
-    public Image BackRoleImage
-    {
-        get { return _backRoleImage; }
-    }
+    [Header("Role")]
+    public Image RoleImage;
+    public Image BackRoleImage;
 
-    [SerializeField]
-    private Image _weaponImage;
+    [Header("Weapon")]
+    public Image WeaponImage;
+    public Image DefaultWeaponImage;
 
-    [SerializeField]
-    private Image _defaultWeaponImage;
+    [Header("Other")]
+    public Image ImageOfDesk;
+    public GameObject BuffZone;
+    public Character NextPlayer;
 
-    [SerializeField]
-    private CanvasGroup _bulletHole;
-    public CanvasGroup BulletHole
-    {
-        get { return _bulletHole; }
-    }
+    [System.NonSerialized] public List<PackAsset> Hand = new List<PackAsset>();
+    [System.NonSerialized] public List<PackAsset> Buffs = new List<PackAsset>();
+    public Dictionary<Character, int> EnemyVisibility = new Dictionary<Character, int>();
 
-    [SerializeField]
-    private CanvasGroup _barell;
-    public CanvasGroup Barell
-    {
-        get { return _barell; }
-    }
-
-    [SerializeField]
-    private Image[] _health;
-    public Image[] Health
-    {
-        get { return _health; }
-    }
-
-    //Enemy position relative to the player
-    [SerializeField]
-    private int _position;
-    public int Position
-    {
-        get { return _position; }
-        set { _position = value; }
-    }
-
-    [SerializeField]
-    private ECharacterType _type;
-    public ECharacterType Type
-    {
-        get { return _type; }
-    }
-    
-    private List<PackAsset> _hand = new List<PackAsset>();
-    public List<PackAsset> Hand
-    {
-        get { return _hand; }
-    }
-    
-    private List<PackAsset> _buffs = new List<PackAsset>();
-    public List<PackAsset> Buffs
-    {
-        get { return _buffs; }
-    }
-
-    [System.NonSerialized]
-    public List<PackAsset> UsedCard = new List<PackAsset>(); //Used cards per turn
-
-    //private RoleAsset _roleInfo;
-    public RoleAsset RoleInfo
-    {
-        get;// { return _roleInfo; }
-        private set;
-    }
-
-    private byte _maxHealth = 4;
-    public byte MaxHealth
-    {
-        get { return _maxHealth; }
-        private set { _maxHealth = value; }
-    }
-    
+    [System.NonSerialized] public byte MaxHealth = 4;
     public bool IsDead { get; set; }
     public bool InJail { get; set; }
-    public int  Scope { get; set; } //Scope of current gun
-    public Image CharacterImage;
-    public GameObject BuffZone; //Zone for displaying all buffs
+    public int  Scope { get; set; }
+    public RoleAsset RoleInfo { get; protected set; }
 
     private PackAsset _weapon;
     public PackAsset Weapon
@@ -114,27 +49,26 @@ public class Character : MonoBehaviour
             if (value == null)
             {
                 Scope = 1;
-                _defaultWeaponImage.gameObject.SetActive(true);
-                _weaponImage = null;
+                DefaultWeaponImage.gameObject.SetActive(true);
+                WeaponImage = null;
                 _weapon = null;
             }
             else
             {
                 _weapon = value;
-                _weaponImage.sprite = value.PackSprite;
+                WeaponImage.sprite = value.PackSprite;
                 Scope = Actions.GetScope(value);
-                _defaultWeaponImage.gameObject.SetActive(false);
+                DefaultWeaponImage.gameObject.SetActive(false);
                 Hand.Remove(value);
             }
         }
     }
-
-    private byte _currentHealth;
+    
     public byte CurrentHealth
     {
         get
         {
-            _currentHealth = 0;
+            byte _currentHealth = 0;
             foreach (Image health in Health)
             {
                 if (health.IsActive())
@@ -143,27 +77,10 @@ public class Character : MonoBehaviour
             return _currentHealth;
         }
     }
-    
-    [System.NonSerialized]
-    public List<Character> botEnemies = new List<Character>();
-
-    public Dictionary<Character, int> EnemyVisibility = new Dictionary<Character, int>();
-    
-    [SerializeField]
-    private GameObject _usingCards;
-
-    public Character NextPlayer;
-    public Button EndMoveBttn;
-    public Button HandBttn;
 
     public static bool operator ==(Character ch1, Character ch2)
     {
         return ReferenceEquals(ch1, ch2);
-        /*return !ReferenceEquals(ch1, null) && 
-               !ReferenceEquals(ch2, null) && 
-               ch1.CharacterImage.sprite == ch2.CharacterImage.sprite &&
-               ch1._roleImage.sprite == ch2._roleImage.sprite &&
-               ch1._position == ch2._position;*/
     }
 
     public static bool operator !=(Character ch1, Character ch2)
@@ -182,91 +99,64 @@ public class Character : MonoBehaviour
         return this == (Character)other;
     }
 
-    public void InitiateCharacter()
+    public virtual void InitiateCharacter()
     {
         CharacterImage.sprite = PackAndDiscard.Instance.GetRandomCharacter();
         RoleInfo = PackAndDiscard.Instance.GetRandomRole();
-        _roleImage.sprite = RoleInfo.RoleSpite;
+        RoleImage.sprite = RoleInfo.RoleSpite;
 
         if (CharacterImage.sprite.name.Contains("el_gringo") || CharacterImage.sprite.name.Contains("paul_regred"))
             MaxHealth--;
 
         if (RoleInfo.Role == ERole.Sheriff)
             MaxHealth++;
-        if (RoleInfo.Role == ERole.Sheriff || _type == ECharacterType.Player)
-            _backRoleImage.gameObject.SetActive(false);
 
         Scope = 1;
         IsDead = false;
 
-        _SetHealth();
-    }
-
-    public void FindEnemy()
-    {
-        if (RoleInfo.Role == ERole.Assistant)
-        {
-            if (UIElements.Instance.Player.RoleInfo.Role != ERole.Sheriff)
-                botEnemies.Add(UIElements.Instance.Player);
-
-            foreach (Character enemy in UIElements.Instance.Enemies)
-            {
-                if (enemy != this && enemy.RoleInfo.Role != ERole.Sheriff)
-                    botEnemies.Add(UIElements.Instance.Player);
-            }
-        }
-        else if (RoleInfo.Role == ERole.Renegade)
-        {
-            botEnemies.Add(UIElements.Instance.Player);
-
-            foreach (Character enemy in UIElements.Instance.Enemies)
-            {
-                if (enemy != this)
-                    botEnemies.Add(UIElements.Instance.Player);
-            }
-        }
+        SetHealth();
     }
 
     public void FillVisibility()
     {
-        if (this == UIElements.Instance.Player)
+        if (this == GlobalVeriables.Instance.Player)
         {
-            EnemyVisibility.Add(UIElements.Instance.Enemies[0], 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[1], 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[2], 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[3], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[0], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[1], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[2], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[3], 1);
         }
-        else if (this == UIElements.Instance.Enemies[0])
+        else if (this == GlobalVeriables.Instance.Enemies[0])
         {
-            EnemyVisibility.Add(UIElements.Instance.Player, 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[1], 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[2], 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[3], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Player, 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[1], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[2], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[3], 2);
         }
-        else if (this == UIElements.Instance.Enemies[1])
+        else if (this == GlobalVeriables.Instance.Enemies[1])
         {
-            EnemyVisibility.Add(UIElements.Instance.Player, 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[0], 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[2], 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[3], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Player, 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[0], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[2], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[3], 2);
         }
-        else if (this == UIElements.Instance.Enemies[2])
+        else if (this == GlobalVeriables.Instance.Enemies[2])
         {
-            EnemyVisibility.Add(UIElements.Instance.Player, 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[0], 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[1], 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[3], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Player, 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[0], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[1], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[3], 1);
         }
-        else if (this == UIElements.Instance.Enemies[3])
+        else if (this == GlobalVeriables.Instance.Enemies[3])
         {
-            EnemyVisibility.Add(UIElements.Instance.Player, 1);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[0], 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[1], 2);
-            EnemyVisibility.Add(UIElements.Instance.Enemies[2], 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Player, 1);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[0], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[1], 2);
+            EnemyVisibility.Add(GlobalVeriables.Instance.Enemies[2], 1);
         }
     }
 
-    private void _SetHealth()
+    protected void SetHealth()
     {
         for (int i = 0; i < MaxHealth; i++)
         {
@@ -275,27 +165,11 @@ public class Character : MonoBehaviour
         }
     }
 
-    public void AddCardToHand(PackAsset card)
-    {
-        Hand.Add(card);
-    }
-
-    public void RemoveCardFromHand(PackAsset card)
-    {
-        Hand.Remove(card);
-    }
-
-    public void RemoveCardToDiscard(PackAsset card)
-    {
-        Hand.Remove(card);
-        PackAndDiscard.Instance.Discard(card);
-    }
-
-    public void AddBuff(PackAsset buff)
+    public virtual void AddBuff(PackAsset buff)
     {
         Buffs.Add(buff);
         Hand.Remove(buff);
-        UsedCard.Add(buff);
+        //UsedCard.Add(buff);
 
         GameObject image = new GameObject();
         image.transform.SetParent(BuffZone.transform, false);
@@ -304,8 +178,6 @@ public class Character : MonoBehaviour
 
         if (buff.CardName == ECardName.Appaloosa)
             Scope++;
-        else if (buff.CardName == ECardName.Mustang)
-            Position++;
     }
 
     public void RemoveBuff(PackAsset buff)
@@ -320,8 +192,7 @@ public class Character : MonoBehaviour
 
         if (buff.CardName == ECardName.Appaloosa)
             Scope--;
-        else if (buff.CardName == ECardName.Mustang)
-            Position--;
+
         else if (buff.CardName == ECardName.Jail)
             JailImage.gameObject.SetActive(false);
     }
@@ -346,7 +217,7 @@ public class Character : MonoBehaviour
             Health[CurrentHealth - 1].gameObject.SetActive(false);
     }
 
-    private void Death(Character enemy)
+    protected virtual void Death(Character enemy)
     {
         List<PackAsset> cards = new List<PackAsset>(Hand);
         
@@ -369,13 +240,13 @@ public class Character : MonoBehaviour
                 PackAndDiscard.Instance.Discard(card);
         }
 
-        _backRoleImage.gameObject.SetActive(false);
+        BackRoleImage.gameObject.SetActive(false);
         IsDead = true;
 
-        foreach (Character bot in UIElements.Instance.Enemies)
+        /*foreach (Character bot in UIElements.Instance.Enemies)
         {
             bot.botEnemies.Remove(this);
-        }
+        }*/
     }
 
     public bool Heal()
@@ -407,20 +278,25 @@ public class Character : MonoBehaviour
         }
     }
 
-    public void StartMove()
+    /*public IEnumerator StartMove()
     {
-        _imageOfDesk.color = new Color(0.8676471f, 0.7360041f, 0.0f);
-        AddCardToHand(PackAndDiscard.Instance.GetRandomCard());
-        AddCardToHand(PackAndDiscard.Instance.GetRandomCard());
+        ImageOfDesk.color = new Color(0.8676471f, 0.7360041f, 0.0f);
+        Hand.Add(PackAndDiscard.Instance.GetRandomCard());
+        Hand.Add(PackAndDiscard.Instance.GetRandomCard());
 
         if (Type == ECharacterType.Bot)
         {
-            StartCoroutine(AIMove.StartMove());
+            yield return new WaitUntil(AIMove.StartMove);
             EndMove();
         }
-    }
+        else
+        {
+            EndMoveBttn.gameObject.SetActive(true);
+            HandBttn.gameObject.SetActive(true);
+        }
+    }*/
 
-    public void EndMove()
+    /*public void EndMove()
     {
         if (Hand.Count > Health.Length && Type == ECharacterType.Player)
         {
@@ -428,21 +304,26 @@ public class Character : MonoBehaviour
             GlobalVeriables.GameState = EGameState.DropCards;
         }
 
-        if (Type == ECharacterType.Bot && _usingCards.activeSelf)
+        if (Type == ECharacterType.Bot && UsingCards.activeSelf)
         {
-            foreach (Image card in _usingCards.GetComponentsInChildren<Image>())
+            foreach (Image card in UsingCards.GetComponentsInChildren<Image>())
                 Destroy(card.gameObject);
         }
 
         if (Type == ECharacterType.Bot)
-            _usingCards.SetActive(false);
+            UsingCards.SetActive(false);
+        else
+        {
+            EndMoveBttn.gameObject.SetActive(false);
+            HandBttn.gameObject.SetActive(false);
+        }
 
-        _imageOfDesk.color = Color.white;
+        ImageOfDesk.color = Color.white;
 
         PlayersMoveQueue.StartNextPlayer();
-    }
+    }*/
 
-    public void UsingCard(PackAsset card)
+    /*public void UsingCard(PackAsset card)
     {
         _usingCards.SetActive(true);
 
@@ -450,5 +331,5 @@ public class Character : MonoBehaviour
         image.transform.SetParent(_usingCards.transform, false);
         Image newBuff = image.AddComponent<Image>();
         newBuff.sprite = card.PackSprite;
-    }
+    }*/
 }

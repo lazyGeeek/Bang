@@ -8,40 +8,38 @@ public class JailLogic : PackAsset
 {
     public override void OnCardClick()
     {
-        UIElements.Instance.CardZone.ClearCardSpawn();
+        base.OnCardClick();
 
-        foreach (Character enemy in UIElements.Instance.Enemies)
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
         {
-            Button enemyCard = Actions.CreateCard(enemy);
-            enemyCard.onClick.AddListener(delegate { Jail(UIElements.Instance.Player, enemy, this); });
+            if (GlobalVeriables.CurrentSheriff != enemy && !enemy.InJail)
+            {
+                Button enemyCard = Actions.CreateCard(enemy);
+                enemyCard.onClick.AddListener(delegate { Jail(GlobalVeriables.Instance.Player, enemy, this); });
+            }
         }
     }
 
-    public static void Jail(Character init, Character defendant, PackAsset currentCard)
+    private static void _Jail(Player init, Bot defendant, PackAsset currentCard)
     {
-        if (defendant.RoleInfo.Role == ERole.Sheriff)
-        {
-            if (UIElements.Instance.CardZone.gameObject.activeSelf)
-                UIElements.Instance.CardZone.ShowMessage("You cant put sheriff in jail");
-            return;
-        }
-        else if (defendant.InJail)
-        {
-            if (UIElements.Instance.CardZone.gameObject.activeSelf)
-                UIElements.Instance.CardZone.ShowMessage("He is already in jail");
-            return;
-        }
-        
         init.Hand.Remove(currentCard);
         init.UsedCard.Add(currentCard);
         defendant.InJail = true;
         defendant.AddBuff(currentCard);
+
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+        Actions.ShowPlayerCards();
+    }
+
+    public static void Jail(Character init, Character defendant, PackAsset currentCard)
+    {
+        if (defendant.RoleInfo.Role == ERole.Sheriff || defendant.InJail)
+            return;
         
-        if (init.Type == ECharacterType.Player)
-        {
-            UIElements.Instance.CardZone.ClearCardSpawn();
-            Actions.Instance.ShowPlayerCards();
-        }
-            
+        init.Hand.Remove(currentCard);
+        defendant.InJail = true;
+        defendant.AddBuff(currentCard);
     }
 }

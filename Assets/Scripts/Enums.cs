@@ -62,9 +62,3 @@ public enum ECardSuit
     Hearts,
     Spades
 }
-
-public enum ECharacterType
-{
-    Player,
-    Bot
-}

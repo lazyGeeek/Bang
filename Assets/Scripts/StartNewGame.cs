@@ -23,17 +23,20 @@ public class StartNewGame : MonoBehaviour
             }
         }
 
-        foreach (Character character in characters)
+        foreach (Bot bot in GlobalVeriables.Instance.Enemies)
         {
-            if (character.Type == ECharacterType.Bot)
-                character.FindEnemy();
-
-            character.FillVisibility();
+            bot.FindEnemy();
+            bot.FillVisibility();
         }
+
+        GlobalVeriables.Instance.Player.FillVisibility();
     }
 
     public void StartGame()
     {
-        GlobalVeriables.CurrentPlayer.StartMove();
+        if (GlobalVeriables.CurrentPlayer == GlobalVeriables.Instance.Player)
+            ((Player)GlobalVeriables.CurrentPlayer).StartMove();
+        else
+            GlobalVeriables.CurrentPlayer.StartCoroutine(((Bot)GlobalVeriables.CurrentPlayer).StartMove());
     }
 }

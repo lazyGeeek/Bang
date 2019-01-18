@@ -6,103 +6,93 @@ using UnityEngine.UI;
 public class BangLogic : PackAsset
 {
     [SerializeField]
-    private AudioClip shootAC;
+    private readonly AudioClip shootAC;
 
-    public override void OnCardClick() //TODO refactoring
+    public override void OnCardClick()
     {
-        if (UIElements.Instance.Player.UsedCard.Exists(card => card.CardName == ECardName.Bang) &&
-            !UIElements.Instance.Player.Buffs.Exists(card => card.CardName == ECardName.Rage))
+        /*if (GlobalVeriables.GameState == EGameState.DropCards)
         {
-            UIElements.Instance.CardZone.ShowMessage("You already use this card");
+            GlobalVeriables.Instance.Player.Hand.Remove(this);
+            PackAndDiscard.Instance.Discard(this);
+            Destroy(CurrentCard.gameObject);
+            return;
+        }*/
+        base.OnCardClick();
+
+        List<Character> scopeEnemies = new List<Character>();
+        PackAsset usedBang = GlobalVeriables.Instance.Player.UsedCard.Find(card => card.CardName == ECardName.Bang);
+        PackAsset rage = GlobalVeriables.Instance.Player.Buffs.Find(card => card.CardName == ECardName.Rage);
+
+        if (usedBang != null && rage == null)
+        {
+            GlobalVeriables.Instance.CardZone.ShowMessage("You already use this card");
             return;
         }
 
-        List<Character> ScopeEnemies = new List<Character>(Actions.GetScopeEnemies(UIElements.Instance.Player));
+        if (usedBang == null)
+            scopeEnemies.AddRange(Actions.GetScopeEnemies(GlobalVeriables.Instance.Player, false));
+        else if (usedBang != null && rage != null)
+            scopeEnemies.AddRange(Actions.GetScopeEnemies(GlobalVeriables.Instance.Player, true));
 
-        if (ScopeEnemies.Count == 0)
+        if (scopeEnemies.Count == 0)
         {
-            UIElements.Instance.CardZone.ShowMessage("You can't see anyone!");
+            GlobalVeriables.Instance.CardZone.ShowMessage("You can't see anyone!");
             return;
         }
 
-        UIElements.Instance.audioSource.clip = shootAC;
+        GlobalVeriables.Instance.audioSource.clip = shootAC;
 
-        if (UIElements.Instance.Player.UsedCard.Exists(card => card.CardName == ECardName.Bang) &&
-            UIElements.Instance.Player.Buffs.Exists(card => card.CardName == ECardName.Rage))
-        {
-            foreach (Character enemy in ScopeEnemies)
-            {
-                if (enemy.Position != 1)
-                    ScopeEnemies.Remove(enemy);
-            }
-        }
-        
-        if (ScopeEnemies.Count == 0)
-        {
-            UIElements.Instance.CardZone.ShowMessage("You can't see anyone!");
-            return;
-        }
-        else
-        {
-            UIElements.Instance.CardZone.ClearCardSpawn();
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
 
-            foreach (Character enemy in ScopeEnemies)
-            {
-                Button enemyButton = Actions.CreateCard(enemy);
-                enemyButton.onClick.AddListener(delegate { Bang(UIElements.Instance.Player, enemy, this); });
-            }
+        foreach (Character enemy in scopeEnemies)
+        {
+            Button enemyButton = Actions.CreateCard(enemy);
+            enemyButton.onClick.AddListener(delegate { _Bang((Bot)enemy, this); });
         }
     }
 
-    public static void Bang(Character killer, Character victim, BangLogic currentCard)
+    private static void _Bang(Bot victim, PackAsset currentCard)
     {
-        killer.Hand.Remove(currentCard);
-        killer.UsedCard.Add(currentCard);
+        GlobalVeriables.Instance.Player.Hand.Remove(currentCard);
+        GlobalVeriables.Instance.Player.UsedCard.Add(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+        AIDefense.Defense(victim, GlobalVeriables.Instance.Player);
 
-        UIElements.Instance.audioSource.clip = currentCard.shootAC;
-        UIElements.Instance.audioSource.Play();
-        
-        if (victim.Type == ECharacterType.Player)
-        {
-            List<PackAsset> defenseCard = new List<PackAsset>();
-            defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Missed));
+        GlobalVeriables.Instance.audioSource.Play();
 
-            PackAsset barrel = UIElements.Instance.Player.Buffs.Find(card => card.CardName == ECardName.Barrel);
-            if (barrel != null)
-                defenseCard.Add(barrel);
-            
-            if (victim.CurrentHealth == 1)
-                defenseCard.AddRange(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Beer));
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+        Actions.ShowPlayerCards();
+    }
 
-            if (defenseCard.Count == 0)
-            {
-                UIElements.Instance.Player.Hit();
-            }
-            else
-            {
-                UIElements.Instance.CardZone.ShowCardSpawn();
-                UIElements.Instance.CardZone.ClearCardSpawn();
-                UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false); 
-                GlobalVeriables.GameState = EGameState.Defense;
+    public static void Bang(Player victim, Bot enemy, PackAsset currentCard)
+    {
+        enemy.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+        GlobalVeriables.GameState = EGameState.Defense;
 
-                foreach (PackAsset card in defenseCard)
-                {
-                    Actions.CreateCard(card);
-                }
-            }
-        }
+        if (GlobalVeriables.Instance.CardZone.isActiveAndEnabled)
+            GlobalVeriables.Instance.CardZone.dropCardButton.gameObject.SetActive(false);
         else
-        {
-            if (!victim.botEnemies.Contains(killer))
-                victim.botEnemies.Add(killer);
+            GlobalVeriables.Instance.CardZone.ShowCardSpawn(true, false);
 
-            AIDefense.Defense(victim, killer);
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
 
-            if (killer.Type == ECharacterType.Player)
-            {
-                UIElements.Instance.CardZone.ClearCardSpawn();
-                Actions.Instance.ShowPlayerCards();
-            }
-        }
+        List<PackAsset> defenseCard = new List<PackAsset>();
+
+        defenseCard.AddRange(victim.Hand.FindAll(card => card.CardName == ECardName.Missed));
+        defenseCard.AddRange(victim.Buffs.FindAll(card => card.CardName == ECardName.Barrel));
+
+        if (victim.CurrentHealth == 1)
+            defenseCard.AddRange(victim.Hand.FindAll(card => card.CardName == ECardName.Beer));
+
+        foreach (PackAsset card in defenseCard)
+            Actions.CreateCard(card);
+    }
+
+    public static void Bang(Bot victim, Bot enemy, PackAsset currentCard)
+    {
+        enemy.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+        AIDefense.Defense(victim, enemy);
     }
 }

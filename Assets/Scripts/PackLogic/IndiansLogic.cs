@@ -12,75 +12,95 @@ public class IndiansLogic : PackAsset
     {
         base.OnCardClick();
 
-        Indians(UIElements.Instance.Player, this);
+        GlobalVeriables.Instance.Player.StartCoroutine(_Indians(GlobalVeriables.Instance.Player, this));
         Destroy(CurrentCard);
     }
 
-    public static void Indians(Character init, IndiansLogic currentCard)
+    private static IEnumerator _Indians(Player init, IndiansLogic currentCard)
     {
-        init.RemoveCardToDiscard(currentCard);
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
         init.UsedCard.Add(currentCard);
-        UIElements.Instance.audioSource.clip = currentCard.audioSource;
-        UIElements.Instance.audioSource.Play();
+        GlobalVeriables.Instance.audioSource.clip = currentCard.audioSource;
+        GlobalVeriables.Instance.audioSource.Play();
 
-        foreach (Character enemy in UIElements.Instance.Enemies)
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
+        {
+            PackAsset bangCard = enemy.Hand.Find(asset => asset.CardName == ECardName.Bang);
+
+            if (bangCard != null)
+            {
+                enemy.Hand.Remove(bangCard);
+                PackAndDiscard.Instance.Discard(bangCard);
+            }
+            else
+                enemy.Hit();
+        }
+
+        yield return new WaitForSeconds(GlobalVeriables.Instance.audioSource.time);
+    }
+
+    public static IEnumerator Indians(Bot init, IndiansLogic currentCard)
+    {
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+        GlobalVeriables.Instance.audioSource.clip = currentCard.audioSource;
+        GlobalVeriables.Instance.audioSource.Play();
+
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
         {
             if (enemy != init)
             {
                 PackAsset bangCard = enemy.Hand.Find(asset => asset.CardName == ECardName.Bang);
 
                 if (bangCard != null)
-                    enemy.RemoveCardFromHand(bangCard);
+                {
+                    enemy.Hand.Remove(bangCard);
+                    PackAndDiscard.Instance.Discard(bangCard);
+                }
                 else
                     enemy.Hit();
             }
         }
 
-        if (UIElements.Instance.Player != init && !UIElements.Instance.Player.IsDead)
+        if (!GlobalVeriables.Instance.Player.IsDead)
         {
-            List<PackAsset> bangs = new List<PackAsset>(UIElements.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Bang));
+            List<PackAsset> bangs = new List<PackAsset>(GlobalVeriables.Instance.Player.Hand.FindAll(card => card.CardName == ECardName.Bang));
 
             if (bangs.Count == 0)
             {
-                UIElements.Instance.Player.Hit();
+                GlobalVeriables.Instance.Player.Hit();
             }
             else
             {
                 GlobalVeriables.GameState = EGameState.Defense;
-                UIElements.Instance.CardZone.ShowCardSpawn();
-                UIElements.Instance.CardZone.ClearCardSpawn();
-                UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false);
-                UIElements.Instance.CardZone.ShowPermanentMessage("Drop bang or take hit");
-
-                GameObject emptyObject = new GameObject();
+                GlobalVeriables.Instance.CardZone.ShowCardSpawn(true, false);
+                GlobalVeriables.Instance.CardZone.ShowPermanentMessage("Drop bang or take hit");
 
                 foreach (PackAsset bang in bangs)
-                {
-                    GameObject cardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
-                    Button card = cardObject.AddComponent<Button>();
-                    Image cardImage = cardObject.AddComponent<Image>();
-                    cardImage.sprite = bang.PackSprite;
-                    card.onClick.AddListener(delegate { DropBangCard(bang); });
-                }
-                Destroy(emptyObject);
+                    _CreateCard(bang);
             }
             
         }
         else
-            Actions.Wait(UIElements.Instance.audioSource.time);
+            yield return new WaitForSeconds(GlobalVeriables.Instance.audioSource.time);
     }
 
-    private static void DropBangCard(PackAsset bangCard)
+    private static void _CreateCard(PackAsset card)
+    {
+        GameObject cardObject = new GameObject();
+        cardObject.transform.SetParent(GlobalVeriables.Instance.CardZone.cardSpawn.transform, false);
+        Button cardButton = cardObject.AddComponent<Button>();
+        Image cardImage = cardObject.AddComponent<Image>();
+        cardImage.sprite = card.PackSprite;
+        cardButton.onClick.AddListener(delegate { _DropBangCard(card); });
+    }
+
+    private static void _DropBangCard(PackAsset bangCard)
     {
         GlobalVeriables.GameState = EGameState.Move;
-        UIElements.Instance.Player.Hand.Remove(bangCard);
-
-        if (GlobalVeriables.CurrentPlayer == UIElements.Instance.Player)
-        {
-            UIElements.Instance.CardZone.ClearCardSpawn();
-            Actions.Instance.ShowPlayerCards();
-        }
-        else
-            UIElements.Instance.CardZone.Close();
+        GlobalVeriables.Instance.Player.Hand.Remove(bangCard);
+        PackAndDiscard.Instance.Discard(bangCard);
+        GlobalVeriables.Instance.CardZone.Close();
     }
 }

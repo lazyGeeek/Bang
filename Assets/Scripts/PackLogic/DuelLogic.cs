@@ -7,69 +7,89 @@ using UnityEngine.UI;
 public class DuelLogic : PackAsset
 {
     [SerializeField]
-    private AudioClip shootAC;
+    private readonly AudioClip shootAC;
 
     public override void OnCardClick()
     {
         base.OnCardClick();
 
-        UIElements.Instance.CardZone.ClearCardSpawn();
-        UIElements.Instance.audioSource.clip = shootAC;
+        GlobalVeriables.Instance.CardZone.ClearCardSpawn();
+        GlobalVeriables.Instance.audioSource.clip = shootAC;
 
-        foreach (Character enemy in UIElements.Instance.Enemies)
+        GlobalVeriables.Instance.CardZone.ShowPermanentMessage("Pick up someone for duel");
+
+        foreach (Bot enemy in GlobalVeriables.Instance.Enemies)
         {
-            Button enemyCard = Actions.CreateCard(enemy);
-            enemyCard.onClick.AddListener(delegate { Duel(UIElements.Instance.Player, enemy, this); });
+            if (!enemy.IsDead)
+            {
+                Button enemyCard = Actions.CreateCard(enemy);
+                enemyCard.onClick.AddListener(delegate { _Duel(GlobalVeriables.Instance.Player, enemy, this); });
+            }
         }
     }
 
-    public static void Duel(Character initPlayer, Character victimPlayer, PackAsset currentCard)
+    private static void _Duel(Character initPlayer, Character victimPlayer, PackAsset currentCard)
     {
-        UIElements.Instance.CardZone.ShowCardSpawn();
-        UIElements.Instance.CardZone.ClearCardSpawn();
-        UIElements.Instance.CardZone.dropCardButton.gameObject.SetActive(false);
-        initPlayer.RemoveCardToDiscard(currentCard);
-        initPlayer.UsedCard.Add(currentCard);
+        GlobalVeriables.Instance.CardZone.ShowCardSpawn(true, false);
+        initPlayer.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
 
-        List<PackAsset> initBang = initPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang"));
-        List<PackAsset> victimBang = victimPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang"));
+        List<PackAsset> initBang = GlobalVeriables.Instance.Player.Hand.FindAll(card => card.PackSprite.name.Contains("bang"));
+        List<PackAsset> victimBang = victimPlayer.Hand.FindAll(card => card.PackSprite.name.Contains("bang"));
 
-        GameObject emptyObject = new GameObject();
-        GameObject initObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
-        Image initImage = initObject.AddComponent<Image>();
-        initImage.sprite = initPlayer.CharacterImage.sprite;
+        _CreateCard().sprite = GlobalVeriables.Instance.Player.CharacterImage.sprite;
 
         foreach (PackAsset card in initBang)
-        {
-            GameObject initCardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
-            Image initCard = initCardObject.AddComponent<Image>();
-            initCard.sprite = card.PackSprite;
-        }
+            _CreateCard().sprite = card.PackSprite;
 
-        GameObject victimObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
-        Image victimImage = victimObject.AddComponent<Image>();
-        victimImage.sprite = victimPlayer.CharacterImage.sprite;
+        _CreateCard().sprite = victimPlayer.CharacterImage.sprite;
 
         foreach (PackAsset card in victimBang)
+            _CreateCard().sprite = card.PackSprite;
+
+        if (initBang.Count < victimBang.Count)
         {
-            GameObject victimCardObject = Instantiate(emptyObject, UIElements.Instance.CardZone.cardSpawn.transform);
-            Image victimCard = victimCardObject.AddComponent<Image>();
-            victimCard.sprite = card.PackSprite;
+            GlobalVeriables.Instance.Player.Hit(victimPlayer);
+            GlobalVeriables.Instance.Player.ShowBulletHole();
+        }
+        else
+        {
+            victimPlayer.Hit(GlobalVeriables.Instance.Player);
+            victimPlayer.ShowBulletHole();
         }
 
-        Destroy(emptyObject);
+        GlobalVeriables.Instance.audioSource.Play();
+    }
+
+    public static void Duel(Bot init, Character victim, PackAsset currentCard)
+    {
+        _Duel(init, victim, currentCard);
+    }
+
+    private static Image _CreateCard()
+    {
+        GameObject cardObject = new GameObject();
+        cardObject.transform.SetParent(GlobalVeriables.Instance.CardZone.cardSpawn.transform, false);
+        Image cardImage = cardObject.AddComponent<Image>();
+        return cardImage;
+    }
+
+    public static void Duel(Bot initPlayer, Bot victimPlayer, PackAsset currentCard)
+    {
+        initPlayer.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
+        
+        List<PackAsset> initBang = initPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang"));
+        List<PackAsset> victimBang = victimPlayer.Hand.FindAll(l => l.PackSprite.name.Contains("bang"));
 
         if (initBang.Count < victimBang.Count)
         {
             initPlayer.Hit(initPlayer);
-            initPlayer.ShowBulletHole();
         }
         else
         {
             victimPlayer.Hit(initPlayer);
             victimPlayer.ShowBulletHole();
         }
-
-        UIElements.Instance.audioSource.Play();
     }
 }

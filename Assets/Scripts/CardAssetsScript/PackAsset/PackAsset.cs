@@ -8,16 +8,7 @@ public class PackAsset : ScriptableObject
     public ECardName CardName;
     public ECardRating CardRating;
     public ECardSuit CardSuit;
-    public Button CurrentCard { get; set; }
-
-    public virtual void OnCardClick()
-    {
-        if (UIElements.Instance.Player.UsedCard.Exists(card => card.CardName == CardName))
-        {
-            UIElements.Instance.CardZone.ShowMessage("You already use this card");
-            return;
-        }
-    }
+    public GameObject CurrentCard { get; set; }
 
     public static bool operator ==(PackAsset p1, PackAsset p2)
     {
@@ -38,5 +29,16 @@ public class PackAsset : ScriptableObject
     {
         if (other == null) return false;
         return this == (PackAsset)other;
+    }
+
+    public virtual void OnCardClick()
+    {
+        if (GlobalVeriables.GameState == EGameState.DropCards)
+        {
+            GlobalVeriables.Instance.Player.Hand.Remove(this);
+            PackAndDiscard.Instance.Discard(this);
+            Destroy(CurrentCard.gameObject);
+            return;
+        }
     }
 }

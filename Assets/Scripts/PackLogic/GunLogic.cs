@@ -7,12 +7,15 @@ public class GunLogic : PackAsset
 {
     public override void OnCardClick()
     {
-        UIElements.Instance.Player.RemoveCardFromHand(this);
+        base.OnCardClick();
 
-        if (UIElements.Instance.Player.Weapon != null)
-            Actions.CreateCard(UIElements.Instance.Player.Weapon);
+        GlobalVeriables.Instance.Player.Hand.Remove(this);
+        PackAndDiscard.Instance.Discard(this);
 
-        UIElements.Instance.Player.Weapon = this;
+        if (GlobalVeriables.Instance.Player.Weapon != null)
+            Actions.CreateCard(GlobalVeriables.Instance.Player.Weapon);
+
+        GlobalVeriables.Instance.Player.Weapon = this;
         Destroy(CurrentCard.gameObject);
     }
 }

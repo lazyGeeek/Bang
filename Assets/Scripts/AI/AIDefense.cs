@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class AIDefense : MonoBehaviour
 {
-    public static void Defense(Character victim, Character enemy)
+    public static void Defense(Bot victim, Character enemy)
     {
         PackAsset missed = victim.Hand.Find(card => card.CardName == ECardName.Missed);
 
@@ -13,8 +13,8 @@ public class AIDefense : MonoBehaviour
         {
             victim.Hand.Remove(missed);
 
-            if (UIElements.Instance.CardZone.isActiveAndEnabled)
-                UIElements.Instance.CardZone.ShowMessage("You missed!");
+            if (GlobalVeriables.Instance.CardZone.isActiveAndEnabled)
+                GlobalVeriables.Instance.CardZone.ShowMessage("You missed!");
 
             return;
         }
@@ -26,21 +26,27 @@ public class AIDefense : MonoBehaviour
             victim.RemoveBuff(barrel);
             if (BarrelLogic.CheckBarrel(victim))
             {
-                if (UIElements.Instance.CardZone.isActiveAndEnabled)
-                    UIElements.Instance.CardZone.ShowMessage("Enemy behind barrel");
+                if (GlobalVeriables.Instance.CardZone.isActiveAndEnabled)
+                    GlobalVeriables.Instance.CardZone.ShowMessage("Enemy behind barrel");
                 return;
             }
         }
 
-        PackAsset beer = victim.Hand.Find(card => card.CardName == ECardName.Beer);
-
-        if (beer != null && victim.CurrentHealth == 1)
+        if (victim.CurrentHealth == 1)
         {
-            victim.Hand.Remove(beer);
-            if (UIElements.Instance.CardZone.isActiveAndEnabled)
-                UIElements.Instance.CardZone.ShowMessage("Enemy heal!");
-            return;
+            PackAsset beer = victim.Hand.Find(card => card.CardName == ECardName.Beer);
+
+            if (beer != null)
+            {
+                victim.Hand.Remove(beer);
+                if (GlobalVeriables.Instance.CardZone.isActiveAndEnabled)
+                    GlobalVeriables.Instance.CardZone.ShowMessage("Enemy heal!");
+                return;
+            }
         }
+
+        if (!victim.botEnemies.Contains(enemy))
+            victim.botEnemies.Add(enemy);
 
         victim.Hit(enemy);
         victim.ShowBulletHole();

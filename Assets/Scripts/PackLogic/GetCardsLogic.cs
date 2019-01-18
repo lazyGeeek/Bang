@@ -10,33 +10,28 @@ public class GetCardsLogic : PackAsset
     {
         base.OnCardClick();
 
-        if (CardName == ECardName.Stagecoach)
-            StageCoach(UIElements.Instance.Player, this);
-        else if (CardName == ECardName.WellsFargo)
-            StageCoach(UIElements.Instance.Player, this);
+        foreach (PackAsset card in StageCoach(GlobalVeriables.Instance.Player, this))
+            Actions.CreateCard(card);
+
+        GlobalVeriables.Instance.Player.UsedCard.Add(this);
         Destroy(CurrentCard.gameObject);
     }
 
-    public static void StageCoach(Character init, PackAsset currentCard)
+    public static PackAsset[] StageCoach(Character init, PackAsset currentCard)
     {
         int count = currentCard.CardName == ECardName.WellsFargo ? 3 : 2;
-        init.RemoveCardToDiscard(currentCard);
-        init.UsedCard.Add(currentCard);
+        init.Hand.Remove(currentCard);
+        PackAndDiscard.Instance.Discard(currentCard);
 
-        List<PackAsset> newCards = new List<PackAsset>();
+        PackAsset[] newCards = new PackAsset[count];
 
         for (int i = 0; i < count; ++i)
-            newCards.Add(PackAndDiscard.Instance.GetRandomCard());
-
-        foreach (PackAsset newCard in newCards)
         {
-            init.AddCardToHand(newCard);
-
-            if (init.Type == ECharacterType.Player)
-            {
-                Button card = Actions.CreateCard(newCard);
-                card.onClick.AddListener(newCard.OnCardClick);
-            }
+            PackAsset card = PackAndDiscard.Instance.GetRandomCard();
+            init.Hand.Add(card);
+            newCards[i] = card;
         }
+
+        return newCards;
     }
 }

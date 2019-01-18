@@ -37,16 +37,16 @@ public class ShowCards : MonoBehaviour
         }
     }
 
-    public void ShowCardSpawn()
+    public void ShowCardSpawn(bool bCloseButton, bool bDropCardButton)
     {
         gameObject.SetActive(true);
+        ClearCardSpawn();
+        messageField.GetComponent<CanvasGroup>().alpha = 0f;
+        messageField.text = "";
 
-        closeButton.gameObject.SetActive(true);
+        closeButton.gameObject.SetActive(bCloseButton);
 
-        if (GlobalVeriables.GameState == EGameState.Defense)
-            dropCardButton.gameObject.SetActive(false);
-        else
-            dropCardButton.gameObject.SetActive(true);
+        dropCardButton.gameObject.SetActive(bDropCardButton);
     }
 
     public void DropCards()
@@ -77,13 +77,14 @@ public class ShowCards : MonoBehaviour
     {
         if (GlobalVeriables.GameState == EGameState.Defense)
         {
-            UIElements.Instance.Player.Hit();
-            UIElements.Instance.Player.ShowBulletHole();
+            GlobalVeriables.Instance.Player.Hit();
+            GlobalVeriables.Instance.Player.ShowBulletHole();
             GlobalVeriables.GameState = EGameState.Move;
         }
 
         ClearCardSpawn();
         messageField.GetComponent<CanvasGroup>().alpha = 0f;
+        messageField.text = "";
         gameObject.SetActive(false);
     }
 }

@@ -8,19 +8,25 @@ public class BuffLogic : PackAsset
 {
     public override void OnCardClick()
     {
-        if (Buff(UIElements.Instance.Player, this))
+        /*if (GlobalVeriables.GameState == EGameState.DropCards)
         {
-            UIElements.Instance.Player.RemoveCardToDiscard(this);
+            GlobalVeriables.Instance.Player.Hand.Remove(this);
+            PackAndDiscard.Instance.Discard(this);
             Destroy(CurrentCard.gameObject);
-        }
+            return;
+        }*/
+        base.OnCardClick();
+
+        if (Buff(GlobalVeriables.Instance.Player, this))
+            Destroy(CurrentCard.gameObject);
         else
-            UIElements.Instance.CardZone.ShowMessage("You already have this buff");
+            GlobalVeriables.Instance.CardZone.ShowMessage("You already have this buff");
     }
 
     public static bool Buff(Character player, PackAsset card)
     {
         if (!player.Buffs.Contains(card))
-            UIElements.Instance.Player.AddBuff(card);
+            GlobalVeriables.Instance.Player.AddBuff(card);
         else
             return false;
 

@@ -7,18 +7,28 @@ public class MissedLogic : PackAsset
 {
     public override void OnCardClick()
     {
-        if (GlobalVeriables.GameState == EGameState.Defense)
+        switch(GlobalVeriables.GameState)
         {
-            GlobalVeriables.GameState = EGameState.Move;
-            UIElements.Instance.Player.RemoveCardToDiscard(this);
-            UIElements.Instance.CardZone.Close();
+            case EGameState.DropCards:
+                GlobalVeriables.Instance.Player.Hand.Remove(this);
+                PackAndDiscard.Instance.Discard(this);
+                Destroy(CurrentCard.gameObject);
+                break;
+
+            case EGameState.Defense:
+                GlobalVeriables.GameState = EGameState.Move;
+                GlobalVeriables.Instance.Player.Hand.Remove(this);
+                PackAndDiscard.Instance.Discard(this);
+                GlobalVeriables.Instance.CardZone.Close();
+                break;
+
+            case EGameState.Move:
+                GlobalVeriables.Instance.CardZone.ShowMessage("You arent under attack");
+                break;
+
+            default:
+                Debug.Log("Unknown game state");
+                break;
         }
-        else if (GlobalVeriables.GameState == EGameState.DropCards)
-        {
-            UIElements.Instance.Player.RemoveCardToDiscard(this);
-            Destroy(CurrentCard.gameObject);
-        }
-        else
-            UIElements.Instance.CardZone.ShowMessage("You arent under attack");
     }
 }

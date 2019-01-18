@@ -4,37 +4,34 @@ using UnityEngine;
 
 public static class AIMove
 {
-    static Character _bot;
+    static Bot _bot;
 
-    public static IEnumerator StartMove()
+    public static void StartMove()
     {
-        _bot = GlobalVeriables.CurrentPlayer;
-
-        if (_bot.Type == ECharacterType.Player)
-            yield break;
+        _bot = (Bot)GlobalVeriables.CurrentPlayer;
         
         _LowHealth();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _SearchGunAndBuffs();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _Panic();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _Beauty();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _GatlingAndIndians();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _Duel();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _Jail();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _Dynamite();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _CheckHealth();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
         _AttackSomeOne();
-        yield return new WaitForSeconds(1f);
-        _EndMove();
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(5f);
+        _bot.StartCoroutine(_EndMove());
+        //yield return new WaitForSeconds(5f);
     }
 
     private static void _LowHealth()
@@ -114,7 +111,7 @@ public static class AIMove
         if (gatling == null)
             return;
 
-        GatlingLogic.Gatling(_bot, (GatlingLogic)gatling);
+        _bot.StartCoroutine(GatlingLogic.Gatling(_bot, (GatlingLogic)gatling));
         _bot.UsingCard(gatling);
 
         PackAsset indians = _bot.Hand.Find(card => card.CardName == ECardName.Indians);
@@ -122,7 +119,7 @@ public static class AIMove
         if (indians == null)
             return;
 
-        IndiansLogic.Indians(_bot, (IndiansLogic)indians);
+        _bot.StartCoroutine(IndiansLogic.Indians(_bot, (IndiansLogic)indians));
         _bot.UsingCard(indians);
     }
 
@@ -200,7 +197,8 @@ public static class AIMove
 
         if (beer != null && _bot.Heal())
         {
-            _bot.RemoveCardToDiscard(beer);
+            _bot.Hand.Remove(beer);
+            PackAndDiscard.Instance.Discard(beer);
             _bot.UsingCard(beer);
         }
     }
@@ -215,7 +213,12 @@ public static class AIMove
         if (_bot.botEnemies.Count > 0)
         {
             Character enemy = _bot.botEnemies[Random.Range(0, _bot.botEnemies.Count)];
-            BangLogic.Bang(_bot, enemy, (BangLogic)bang);
+
+            if (enemy == GlobalVeriables.Instance.Player)
+                BangLogic.Bang((Player)enemy, _bot, (BangLogic)bang);
+            else
+                BangLogic.Bang((Bot)enemy, _bot, (BangLogic)bang);
+
             _bot.UsingCard(bang);
         }
 
@@ -236,7 +239,12 @@ public static class AIMove
                 while (_bot.Hand.FindAll(card => card.CardName == ECardName.Bang).Count > 0 && enemies.Count > 0)
                 {
                     Character randomCharacter = enemies[Random.Range(0, enemies.Count)];
-                    BangLogic.Bang(_bot, randomCharacter, (BangLogic)_bot.Hand.Find(card => card.CardName == ECardName.Bang));
+                    
+                    if (randomCharacter == GlobalVeriables.Instance.Player)
+                        BangLogic.Bang((Player)randomCharacter, _bot, (BangLogic)bang);
+                    else
+                        BangLogic.Bang((Bot)randomCharacter, _bot, (BangLogic)bang);
+
                     _bot.UsingCard(bang);
 
                     if (randomCharacter.IsDead)
@@ -246,17 +254,19 @@ public static class AIMove
         }
     }
 
-    private static void _EndMove()
+    private static IEnumerator _EndMove()
     {
-        if (_bot.Hand.Count <= _bot.CurrentHealth) return;
+        yield return new WaitForSeconds(5f);
+
+        if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
         
         _bot.Hand.RemoveAll(card => card.CardType == ECardType.Weapon);
         
-        if (_bot.Hand.Count <= _bot.CurrentHealth) return;
+        if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
 
         _bot.Hand.RemoveAll(card => card.CardType == ECardType.Buff);
         
-        if (_bot.Hand.Count <= _bot.CurrentHealth) return;
+        if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
 
         ECardName[] cardsToDelete = new ECardName[]
         {
@@ -282,7 +292,7 @@ public static class AIMove
             foreach (PackAsset card in cards)
             {
                 _bot.Hand.Remove(card);
-                if (_bot.Hand.Count <= _bot.CurrentHealth) return;
+                if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
             }
         }
 
