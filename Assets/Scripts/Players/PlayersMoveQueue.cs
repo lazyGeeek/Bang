@@ -17,6 +17,8 @@ public static class PlayersMoveQueue
         if (dynamite != null)
             DynamiteLogic.CheckDynamite(GlobalVeriables.CurrentPlayer, (DynamiteLogic)dynamite);
 
+        yield return new WaitWhile(() => GlobalVeriables.Instance.DeadMessageZone.isActiveAndEnabled);
+
         PackAsset jail = GlobalVeriables.CurrentPlayer.Buffs.Find(card => card.CardName == ECardName.Jail);
         bool canMove = true;
 
@@ -37,7 +39,7 @@ public static class PlayersMoveQueue
             }
             else
             {
-                ((Bot)GlobalVeriables.CurrentPlayer).StartMove();
+                GlobalVeriables.CurrentPlayer.StartCoroutine(((Bot)GlobalVeriables.CurrentPlayer).StartMove());
                 yield return new WaitUntil(() => ((Bot)GlobalVeriables.CurrentPlayer).UsingCards.activeSelf);
             }
         }

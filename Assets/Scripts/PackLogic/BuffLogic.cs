@@ -25,7 +25,7 @@ public class BuffLogic : PackAsset
 
     public static bool Buff(Character player, PackAsset card)
     {
-        if (!player.Buffs.Contains(card))
+        if (player.Buffs.Find(asset => asset.CardName == card.CardName) == null)
             GlobalVeriables.Instance.Player.AddBuff(card);
         else
             return false;

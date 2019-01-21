@@ -26,6 +26,7 @@ public class Character : MonoBehaviour
     public Image ImageOfDesk;
     public GameObject BuffZone;
     public Character NextPlayer;
+    public Character PreviousPlayer;
 
     [System.NonSerialized] public List<PackAsset> Hand = new List<PackAsset>();
     [System.NonSerialized] public List<PackAsset> Buffs = new List<PackAsset>();
@@ -242,6 +243,8 @@ public class Character : MonoBehaviour
 
         BackRoleImage.gameObject.SetActive(false);
         IsDead = true;
+
+        PreviousPlayer.NextPlayer = NextPlayer;
 
         /*foreach (Character bot in UIElements.Instance.Enemies)
         {

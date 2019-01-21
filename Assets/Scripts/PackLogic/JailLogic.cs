@@ -17,7 +17,7 @@ public class JailLogic : PackAsset
             if (GlobalVeriables.CurrentSheriff != enemy && !enemy.InJail)
             {
                 Button enemyCard = Actions.CreateCard(enemy);
-                enemyCard.onClick.AddListener(delegate { Jail(GlobalVeriables.Instance.Player, enemy, this); });
+                enemyCard.onClick.AddListener(delegate { _Jail(GlobalVeriables.Instance.Player, enemy, this); });
             }
         }
     }

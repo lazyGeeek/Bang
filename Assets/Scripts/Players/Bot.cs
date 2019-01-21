@@ -9,6 +9,8 @@ public class Bot : Character
 
     [System.NonSerialized]
     public List<Character> botEnemies = new List<Character>();
+    [System.NonSerialized]
+    public bool endMove = false;
 
     public override void InitiateCharacter()
     {
@@ -45,6 +47,29 @@ public class Bot : Character
 
     protected override void Death(Character enemy)
     {
+        if (RoleInfo.Role == ERole.Sheriff)
+        {
+            if (GlobalVeriables.Instance.CardZone.isActiveAndEnabled)
+                GlobalVeriables.Instance.CardZone.Close();
+            GlobalVeriables.Instance.DeadMessageZone.ShowDeadMessage("Sheriff is dead! Bad guys are win!");
+            return;
+        }
+
+        GlobalVeriables.Instance.Enemies.Remove(this);
+
+        List<Character> alivePeople = new List<Character> { GlobalVeriables.Instance.Player };
+        GlobalVeriables.Instance.Enemies.ForEach(bot => alivePeople.Add(bot));
+        alivePeople.RemoveAll(player => player.RoleInfo.Role == ERole.Assistant || player.RoleInfo.Role == ERole.Sheriff);
+
+
+        if (alivePeople.Count == 0)
+        {
+            if (GlobalVeriables.Instance.CardZone.isActiveAndEnabled)
+                GlobalVeriables.Instance.CardZone.Close();
+            GlobalVeriables.Instance.DeadMessageZone.ShowDeadMessage("All bad guys are dead! Good guys are win!");
+            return;
+        }
+
         base.Death(enemy);
 
         foreach (Bot bot in GlobalVeriables.Instance.Enemies)
@@ -59,8 +84,8 @@ public class Bot : Character
         Hand.Add(PackAndDiscard.Instance.GetRandomCard());
         Hand.Add(PackAndDiscard.Instance.GetRandomCard());
 
-        AIMove.StartMove();
-        yield return new WaitWhile(() => UsingCards.activeSelf);
+        StartCoroutine(AIMove.StartMove());
+        yield return new WaitUntil(() => endMove);
 
         EndMove();
     }
@@ -76,8 +101,9 @@ public class Bot : Character
         UsingCards.SetActive(false);
 
         ImageOfDesk.color = Color.white;
+        endMove = true;
 
-        PlayersMoveQueue.StartNextPlayer();
+        StartCoroutine(PlayersMoveQueue.StartNextPlayer());
     }
 
     public void UsingCard(PackAsset card)

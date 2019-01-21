@@ -8,6 +8,7 @@ public class GlobalVeriables : MonoBehaviour
     public List<Bot> Enemies;
     public ShowCards CardZone;
     public ShowCurrentPlayer CurrentPlayerZone;
+    public DeadMessage DeadMessageZone;
     public Sprite BackCard;
     public AudioSource audioSource;
 

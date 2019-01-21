@@ -6,32 +6,40 @@ public static class AIMove
 {
     static Bot _bot;
 
-    public static void StartMove()
+    public static IEnumerator StartMove()
     {
         _bot = (Bot)GlobalVeriables.CurrentPlayer;
         
         _LowHealth();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
         _SearchGunAndBuffs();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
         _Panic();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.CardZone.isActiveAndEnabled);
         _Beauty();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.CardZone.isActiveAndEnabled);
         _GatlingAndIndians();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.CardZone.isActiveAndEnabled);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.DeadMessageZone.isActiveAndEnabled);
         _Duel();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.CardZone.isActiveAndEnabled);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.DeadMessageZone.isActiveAndEnabled);
         _Jail();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
         _Dynamite();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
         _CheckHealth();
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
         _AttackSomeOne();
-        //yield return new WaitForSeconds(5f);
-        _bot.StartCoroutine(_EndMove());
-        //yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.CardZone.isActiveAndEnabled);
+        yield return new WaitWhile(() => GlobalVeriables.Instance.DeadMessageZone.isActiveAndEnabled);
+        _EndMove();
+        yield return new WaitForSeconds(1f);
     }
 
     private static void _LowHealth()
@@ -226,12 +234,12 @@ public static class AIMove
 
         if (rage != null)
         {
-            List<Character> enemies = new List<Character>(Actions.GetScopeEnemies(_bot, true));
+            List<Character> enemies = new List<Character>();
 
-            foreach (Character enemy in enemies)
+            foreach (Character enemy in Actions.GetScopeEnemies(_bot, true))
             {
-                if (!_bot.botEnemies.Contains(enemy))
-                    enemies.Remove(enemy);
+                if (_bot.botEnemies.Contains(enemy))
+                    enemies.Add(enemy);
             }
 
             if (_bot.Hand.FindAll(card => card.CardName == ECardName.Bang).Count > 0 && enemies.Count > 0)
@@ -254,19 +262,31 @@ public static class AIMove
         }
     }
 
-    private static IEnumerator _EndMove()
+    private static void _EndMove()
     {
-        yield return new WaitForSeconds(5f);
+        //yield return new WaitForSeconds(5f);
 
-        if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
-        
+        if (_bot.Hand.Count <= _bot.CurrentHealth)
+        {
+            _bot.endMove = true;
+            return;// yield break;
+        }
+
         _bot.Hand.RemoveAll(card => card.CardType == ECardType.Weapon);
-        
-        if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
+
+        if (_bot.Hand.Count <= _bot.CurrentHealth)
+        {
+            _bot.endMove = true;
+            return;// yield break;
+        }
 
         _bot.Hand.RemoveAll(card => card.CardType == ECardType.Buff);
-        
-        if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
+
+        if (_bot.Hand.Count <= _bot.CurrentHealth)
+        {
+            _bot.endMove = true;
+            return;// yield break;
+        }
 
         ECardName[] cardsToDelete = new ECardName[]
         {
@@ -292,7 +312,11 @@ public static class AIMove
             foreach (PackAsset card in cards)
             {
                 _bot.Hand.Remove(card);
-                if (_bot.Hand.Count <= _bot.CurrentHealth) yield break;
+                if (_bot.Hand.Count <= _bot.CurrentHealth)
+                {
+                    _bot.endMove = true;
+                    return;// yield break;
+                }
             }
         }
 
